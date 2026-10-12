@@ -1,0 +1,36 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { Plus, ArrowUpRight } from "lucide-react";
+import type { Product } from "@/lib/types";
+import { useCart } from "@/lib/store";
+import { Price } from "@/components/price";
+import { WishlistButton } from "@/components/shop/wishlist-button";
+
+const LABELS = { new: "Just arrived", bestseller: "Most loved", limited: "Limited edition" };
+
+export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
+  const { addItem, setOpen } = useCart();
+  const soldOut = product.stock <= 0;
+  const oneSize = product.sizes.length === 0;
+  const image = product.images[0];
+  return (
+    <article className="store-product-card">
+      <div className="store-product-image">
+        <Link href={`/product/${product.slug}`} className="store-product-image-link" aria-label={`View ${product.name}`}>
+          {image ? <Image src={image} alt={product.name} fill priority={priority} sizes="(min-width: 1280px) 24vw, (min-width: 768px) 32vw, 50vw" className="product-primary-image" unoptimized={image.startsWith("data:")} /> : <span className="product-image-placeholder">Wearables Atelier</span>}
+          {product.images[1] && <Image src={product.images[1]} alt="" fill sizes="(min-width: 1280px) 24vw, (min-width: 768px) 32vw, 50vw" className="product-secondary-image" unoptimized={product.images[1].startsWith("data:")} />}
+        </Link>
+        {(soldOut || product.badge) && <span className="store-product-badge">{soldOut ? "Sold out" : product.badge ? LABELS[product.badge] : ""}</span>}
+        <WishlistButton id={product.id} name={product.name} />
+        {!soldOut && (oneSize ? <button type="button" className="product-quick-action" aria-label={`Add ${product.name} to bag`} onClick={() => { addItem(product.id, null); setOpen(true); }}><Plus size={18} aria-hidden /></button> : <Link href={`/product/${product.slug}`} className="product-quick-action" aria-label={`Choose size for ${product.name}`}><ArrowUpRight size={18} aria-hidden /></Link>)}
+      </div>
+      <div className="store-product-info">
+        <p className="store-product-category">{product.category === "clothing" ? "Ready to wear" : "Jewelry"}</p>
+        <h3><Link href={`/product/${product.slug}`}>{product.name}</Link></h3>
+        <Price amountNGN={product.priceNGN} compareAtNGN={product.compareAtNGN} className="store-product-price" />
+      </div>
+    </article>
+  );
+}
