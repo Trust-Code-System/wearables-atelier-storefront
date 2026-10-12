@@ -6,6 +6,8 @@ Customer shopping site for Wearables by Ashabi: clothing, jewellery, product det
 
 Source: [wearables-atelier-storefront](https://github.com/Trust-Code-System/wearables-atelier-storefront). Admin source: [wearables-atelier-admin](https://github.com/Trust-Code-System/wearables-atelier-admin).
 
+Live storefront: [wearables-atelier-storefront.vercel.app](https://wearables-atelier-storefront.vercel.app).
+
 ## Getting Started
 
 Install and run with Node.js 22 LTS or newer:
@@ -43,4 +45,4 @@ See `docs/project-separation.md` for the backend and migration boundary.
 
 Import **this repository** as one Next.js project on Vercel or another Next.js/Node.js host. Use repository root `.` as the project directory, `npm ci` to install and `npm run build` to build. The admin repository must be imported as a second project with its own environment settings and address. GitHub Pages is unsuitable for this app's dynamic routes.
 
-Source repositories are private. This split does not publish either site or configure a live domain. Before using the two sites for real commerce, connect the shared backend, server-side order/payment validation and admin authentication.
+The source repositories are public at the owner's request. The storefront is deployed as its own Vercel project under Trustcode System, with Git integration on `main`. Before using the two sites for real commerce, connect the shared backend, server-side order/payment validation and admin authentication.
