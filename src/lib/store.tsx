@@ -11,6 +11,7 @@ import {
 } from "react";
 import type { CartItem, Currency, Order, Product } from "@/lib/types";
 import { seedProducts, migrateBrandCatalog, legacyProductSlugIds } from "@/lib/products";
+import { addStockItem, setStockQuantity } from "@/lib/stock";
 
 /* ------------------------------------------------------------------ */
 /*  Public storefront settings                                       */
@@ -221,22 +222,15 @@ const sameLine = (a: CartItem, productId: string, size: number | null) =>
   a.productId === productId && a.size === size;
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { products } = useCatalog();
   const [items, setItems] = usePersistentState<CartItem[]>("wa:cart", []);
   const [isOpen, setOpen] = useState(false);
 
   const addItem = useCallback(
     (productId: string, size: number | null, qty = 1) => {
-      setItems((prev) => {
-        const existing = prev.find((i) => sameLine(i, productId, size));
-        if (existing) {
-          return prev.map((i) =>
-            sameLine(i, productId, size) ? { ...i, qty: i.qty + qty } : i,
-          );
-        }
-        return [...prev, { productId, size, qty }];
-      });
+      setItems((prev) => addStockItem(prev, products.find((product) => product.id === productId), size, qty));
     },
-    [setItems],
+    [setItems, products],
   );
 
   const removeItem = useCallback(
@@ -251,11 +245,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         removeItem(productId, size);
         return;
       }
-      setItems((prev) =>
-        prev.map((i) => (sameLine(i, productId, size) ? { ...i, qty } : i)),
-      );
+      setItems((prev) => setStockQuantity(prev, products.find((product) => product.id === productId), productId, size, qty));
     },
-    [setItems, removeItem],
+    [setItems, removeItem, products],
   );
 
   const clear = useCallback(() => setItems([]), [setItems]);

@@ -9,19 +9,21 @@ import {
   ArrowRightIcon,
   CheckIcon,
   CreditCardIcon,
-  Loader2Icon,
   LockIcon,
   ShoppingBagIcon,
 } from "lucide-react";
 import { useCart, useCatalog, useCurrency, useOrders, useSettings } from "@/lib/store";
 import { formatPrice, generateReference } from "@/lib/format";
 import { EASE_OUT } from "@/components/motion";
+import { SlideCommit } from "@/components/micro/slide-commit";
+import { SpringCheck } from "@/components/micro/spring-check";
 import { Price } from "@/components/price";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { cartHasStockIssues } from "@/lib/stock";
 
 type Step = 0 | 1 | 2;
 const STEPS = ["Information", "Delivery", "Payment"] as const;
@@ -61,7 +63,7 @@ function Field({
 }
 
 export default function CheckoutPage() {
-  const { items, clear } = useCart();
+  const { items, clear, setOpen } = useCart();
   const { products } = useCatalog();
   const { currency } = useCurrency();
   const { addOrder } = useOrders();
@@ -83,6 +85,7 @@ export default function CheckoutPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [delivery, setDelivery] = useState<"standard" | "express">("standard");
+  const [newsletter, setNewsletter] = useState(true);
 
   const lines = useMemo(
     () =>
@@ -99,6 +102,7 @@ export default function CheckoutPage() {
     ? 0
     : (deliveryOptions.find((d) => d.id === delivery) ?? deliveryOptions[0]).feeNGN;
   const total = subtotal + deliveryFee;
+  const stockIssues = cartHasStockIssues(items, products);
 
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -124,6 +128,7 @@ export default function CheckoutPage() {
   };
 
   const handlePay = () => {
+    if (stockIssues || items.length === 0) return;
     setPayState("processing");
     // NOTE for backend: replace this simulated delay with Paystack Inline
     // (PaystackPop.setup) or a Paystack Standard redirect, then verify
@@ -152,6 +157,10 @@ export default function CheckoutPage() {
       clear();
     }, 2200);
   };
+
+  if (stockIssues && !reference) {
+    return <div className="mx-auto flex max-w-xl flex-col items-center gap-4 px-6 py-24 text-center"><p className="eyebrow">Availability update</p><h1 className="font-display text-3xl">Let&apos;s update your bag.</h1><p className="text-muted-foreground">Some pieces are unavailable or your quantities exceed the available stock. Adjust your bag before continuing.</p><Button onClick={() => setOpen(true)}>Review your bag</Button><Link href="/shop" className="link-underline">Continue shopping</Link></div>;
+  }
 
   /* ---------- Empty cart ---------- */
   if (lines.length === 0 && !reference) {
@@ -300,6 +309,12 @@ export default function CheckoutPage() {
                       <Input className={inputClass} value={form.state} onChange={set("state")} placeholder="Lagos" aria-invalid={!!errors.state} aria-describedby={errors.state ? "checkout-state-error" : undefined} autoComplete="address-level1" />
                     </Field>
                   </div>
+                  <SpringCheck
+                    checked={newsletter}
+                    onCheckedChange={setNewsletter}
+                    label="Keep me posted"
+                    description="First look at new pieces and notes from the atelier. No noise — unsubscribe anytime."
+                  />
                   <div className="mt-2 flex justify-end">
                     <Button
                       size="lg"
@@ -409,31 +424,18 @@ export default function CheckoutPage() {
                         </Field>
                       </div>
 
-                      <motion.button
-                        type="button"
-                        onClick={handlePay}
-                        disabled={payState !== "idle"}
-                        whileTap={payState === "idle" ? { scale: 0.98 } : undefined}
-                        className={cn(
-                          "mt-1 flex h-12 items-center justify-center gap-2 rounded-lg text-[0.9375rem] font-semibold text-white transition-colors duration-200",
-                          payState === "done" ? "bg-emerald-600" : "bg-[#0ba4db] hover:bg-[#0993c4]",
-                          payState === "processing" && "cursor-wait",
-                        )}
-                      >
-                        {payState === "processing" ? (
-                          <>
-                            <Loader2Icon className="size-4.5 animate-spin [animation-duration:0.7s]" />
-                            Processing…
-                          </>
-                        ) : payState === "done" ? (
-                          <>
-                            <CheckIcon className="size-4.5" />
-                            Payment successful
-                          </>
-                        ) : (
-                          <>Pay {formatPrice(total, currency)}</>
-                        )}
-                      </motion.button>
+                      <div className="mt-1 flex flex-col gap-2">
+                        <SlideCommit
+                          label={`Slide to pay ${formatPrice(total, currency)}`}
+                          processingLabel="Talking to Paystack…"
+                          doneLabel="Payment successful"
+                          state={payState}
+                          onCommit={handlePay}
+                        />
+                        <p className="text-center text-[0.6875rem] text-muted-foreground">
+                          Slide the handle — or press Enter — to confirm.
+                        </p>
+                      </div>
                     </div>
                   </div>
 

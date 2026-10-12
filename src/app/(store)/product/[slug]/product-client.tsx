@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { CheckIcon, MinusIcon, PlusIcon, RulerIcon, ShoppingBagIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useCart, useCatalog } from "@/lib/store";
@@ -21,10 +21,11 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
+import { canAddStock, cartProductQty, stockCount, stockLabel } from "@/lib/stock";
 
 export function ProductClient({ slug }: { slug: string }) {
   const { products, getProduct } = useCatalog();
-  const { addItem, setOpen } = useCart();
+  const { items, addItem, setOpen } = useCart();
 
   const product = getProduct(slug);
   const [imageIndex, setImageIndex] = useState(0);
@@ -32,6 +33,7 @@ export function ProductClient({ slug }: { slug: string }) {
   const [qty, setQtyLocal] = useState(1);
   const [sizeError, setSizeError] = useState(false);
   const [added, setAdded] = useState(false);
+  const reduceMotion = useReducedMotion() ?? false;
 
   const related = useMemo(() => {
     if (!product) return [];
@@ -53,9 +55,12 @@ export function ProductClient({ slug }: { slug: string }) {
   }
 
   const oneSize = product.sizes.length === 0;
-  const soldOut = product.stock <= 0;
+  const soldOut = stockCount(product) === 0;
+  const remainingForBag = Math.max(0, stockCount(product) - cartProductQty(items, product.id));
+  const canAdd = canAddStock(items, product, qty);
 
   const handleAdd = () => {
+    if (!canAdd) return;
     if (!oneSize && size === null) {
       setSizeError(true);
       toast.error("Choose a size first", {
@@ -110,7 +115,7 @@ export function ProductClient({ slug }: { slug: string }) {
                 />
               </motion.div>
             </AnimatePresence>
-            {product.badge ? (
+            {soldOut ? <span className="product-unavailable-overlay">Unavailable at the moment</span> : product.badge ? (
               <Badge variant="secondary" className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm capitalize">
                 {product.badge}
               </Badge>
@@ -149,9 +154,13 @@ export function ProductClient({ slug }: { slug: string }) {
             </h1>
             <Price
               amountNGN={product.priceNGN}
-              compareAtNGN={product.compareAtNGN}
+              compareAtNGN={soldOut ? undefined : product.compareAtNGN}
               className="text-lg"
             />
+            <div className="product-stock-detail" data-unavailable={soldOut || undefined}>
+              <p className="product-stock">{stockLabel(product)}</p>
+              <p>{soldOut ? "You can still save this piece to your wishlist." : oneSize ? "Available in the collection." : "Total across all sizes. Choose your size below."}</p>
+            </div>
           </div>
 
           <p className="max-w-lg text-[0.9375rem] leading-relaxed text-muted-foreground">
@@ -181,27 +190,41 @@ export function ProductClient({ slug }: { slug: string }) {
                   Size guide
                 </button>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {product.sizes.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => {
-                      setSize(s);
-                      setSizeError(false);
-                    }}
-                    aria-pressed={size === s}
-                    className={cn(
-                      "grid size-11 place-items-center rounded-md border text-sm tabular-nums transition-all duration-150 ease-out active:scale-95",
-                      size === s
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border hover:border-foreground/50",
-                      sizeError && size === null && "border-destructive/50",
-                    )}
-                  >
-                    {s}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Select size">
+                {product.sizes.map((s, i) => {
+                  const selected = size === s;
+                  const selectedIndex = size === null ? -1 : product.sizes.indexOf(size);
+                  // Jelly Radio: the chosen chip swells on a spring and barges
+                  // its neighbours outward, decaying with distance.
+                  const distance = selectedIndex === -1 ? 0 : i - selectedIndex;
+                  const nudge = selected || selectedIndex === -1 ? 0 : Math.sign(distance) * Math.max(0, 7 - Math.abs(distance) * 2.5);
+                  return (
+                    <motion.button
+                      key={s}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      disabled={soldOut}
+                      onClick={() => {
+                        setSize(s);
+                        setSizeError(false);
+                      }}
+                      initial={false}
+                      animate={reduceMotion ? undefined : { scale: selected ? 1.14 : 1, x: nudge }}
+                      whileTap={reduceMotion ? undefined : { scale: 0.9 }}
+                      transition={{ type: "spring", stiffness: 520, damping: 26 }}
+                      className={cn(
+                        "relative grid size-11 place-items-center rounded-md border text-sm tabular-nums transition-colors duration-150 ease-out",
+                        selected
+                          ? "z-[1] border-primary bg-primary text-primary-foreground"
+                          : "border-border hover:border-foreground/50",
+                        sizeError && size === null && "border-destructive/50",
+                      )}
+                    >
+                      {s}
+                    </motion.button>
+                  );
+                })}
               </div>
               <p className="text-[0.75rem] text-muted-foreground">
                 Numbered sizing — 6 (XS) through 16 (XXL). True to fit.
@@ -219,6 +242,7 @@ export function ProductClient({ slug }: { slug: string }) {
               <button
                 type="button"
                 aria-label="Decrease quantity"
+                disabled={soldOut || qty <= 1}
                 onClick={() => setQtyLocal((q) => Math.max(1, q - 1))}
                 className="grid h-full w-10 place-items-center transition-all duration-150 ease-out hover:bg-muted active:scale-90"
               >
@@ -228,7 +252,8 @@ export function ProductClient({ slug }: { slug: string }) {
               <button
                 type="button"
                 aria-label="Increase quantity"
-                onClick={() => setQtyLocal((q) => Math.min(product.stock || 10, q + 1))}
+                disabled={soldOut || qty >= remainingForBag}
+                onClick={() => setQtyLocal((q) => Math.min(remainingForBag, q + 1))}
                 className="grid h-full w-10 place-items-center transition-all duration-150 ease-out hover:bg-muted active:scale-90"
               >
                 <PlusIcon className="size-4" />
@@ -242,7 +267,7 @@ export function ProductClient({ slug }: { slug: string }) {
             >
               <Button
                 size="lg"
-                disabled={soldOut}
+                disabled={!canAdd}
                 onClick={handleAdd}
                 className="h-12 w-full text-[0.9375rem] transition-all duration-150 ease-out active:scale-[0.98]"
               >
@@ -251,17 +276,13 @@ export function ProductClient({ slug }: { slug: string }) {
                 ) : (
                   <ShoppingBagIcon data-icon="inline-start" />
                 )}
-                {soldOut ? "Sold out" : added ? "Added to bag" : "Add to bag"}
+                {soldOut ? "Currently unavailable" : remainingForBag === 0 ? "All available pieces in your bag" : added ? "Added to bag" : "Add to bag"}
               </Button>
             </motion.div>
           </div>
 
           <WishlistButton id={product.id} name={product.name} showLabel />
-          {product.stock > 0 && product.stock <= 8 && (
-            <p className="text-[0.75rem] font-medium text-bronze">
-              {product.stock} pieces available.
-            </p>
-          )}
+          {!soldOut && !canAdd && remainingForBag > 0 && <p className="text-sm text-muted-foreground">You can add {remainingForBag} more {remainingForBag === 1 ? "piece" : "pieces"} to your bag. Reduce the quantity to continue.</p>}
 
           {/* Accordions */}
           <Accordion defaultValue={["details"]} multiple className="mt-2">

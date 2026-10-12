@@ -16,6 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { EASE_OUT } from "@/components/motion";
+import { SwipeRow } from "@/components/micro/swipe-row";
+import { canAddStock, cartHasStockIssues, cartProductQty, stockCount, stockLabel } from "@/lib/stock";
 
 export function CartDrawer() {
   const { items, isOpen, setOpen, setQty, removeItem, count } = useCart();
@@ -32,6 +34,7 @@ export function CartDrawer() {
   const subtotal = lines.reduce((sum, l) => sum + l.product.priceNGN * l.qty, 0);
   const toFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
   const progress = freeShippingThreshold > 0 ? Math.min(1, subtotal / freeShippingThreshold) : 1;
+  const stockIssues = cartHasStockIssues(items, products);
 
   return (
     <Sheet open={isOpen} onOpenChange={setOpen}>
@@ -51,7 +54,7 @@ export function CartDrawer() {
           </SheetTitle>
         </SheetHeader>
 
-        {lines.length === 0 ? (
+        {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
             <div className="grid size-14 place-items-center rounded-full bg-muted">
               <ShoppingBagIcon className="size-6 text-muted-foreground" />
@@ -97,6 +100,7 @@ export function CartDrawer() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-5">
+              {items.filter((item) => !products.some((product) => product.id === item.productId)).map((item) => <div key={`${item.productId}-${item.size}`} className="border-b py-4 text-sm"><p>This piece is no longer in the collection.</p><button type="button" className="underline" onClick={() => removeItem(item.productId, item.size)}>Remove unavailable piece</button></div>)}
               <AnimatePresence initial={false}>
                 {lines.map((line) => (
                   <motion.div
@@ -106,8 +110,10 @@ export function CartDrawer() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: 24, transition: { duration: 0.18 } }}
                     transition={{ duration: 0.35, ease: [...EASE_OUT] }}
-                    className="flex gap-4 border-b py-4 last:border-0"
+                    className="border-b last:border-0"
                   >
+                    <SwipeRow onRemove={() => removeItem(line.productId, line.size)} removeLabel="Remove">
+                      <div className="flex gap-4 py-4">
                     <Link
                       href={`/product/${line.product.slug}`}
                       onClick={() => setOpen(false)}
@@ -135,6 +141,8 @@ export function CartDrawer() {
                           <p className="mt-0.5 text-[0.75rem] text-muted-foreground">
                             {line.size !== null ? `Size ${line.size}` : "One size"}
                           </p>
+                          <p className="product-stock mt-1" data-unavailable={stockCount(line.product) === 0 || undefined}>{stockLabel(line.product)}</p>
+                          {cartProductQty(items, line.productId) > stockCount(line.product) && stockCount(line.product) > 0 && <p className="text-xs text-muted-foreground">Reduce the quantity to match available stock.</p>}
                         </div>
                         <button
                           type="button"
@@ -162,6 +170,7 @@ export function CartDrawer() {
                           <button
                             type="button"
                             aria-label="Increase quantity"
+                            disabled={!canAddStock(items, line.product)}
                             onClick={() => setQty(line.productId, line.size, line.qty + 1)}
                             className="grid size-7 place-items-center transition-all duration-150 ease-out hover:bg-muted active:scale-90"
                           >
@@ -173,6 +182,8 @@ export function CartDrawer() {
                         </p>
                       </div>
                     </div>
+                      </div>
+                    </SwipeRow>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -188,14 +199,14 @@ export function CartDrawer() {
               <p className="text-[0.75rem] text-muted-foreground">
                 Delivery calculated at checkout. Taxes included.
               </p>
-              <Button
+              {stockIssues ? <><p role="status" className="text-sm text-muted-foreground">Remove unavailable pieces or adjust quantities before checkout.</p><Button size="lg" disabled className="w-full">Update your bag to continue</Button></> : <Button
                 size="lg"
                 className="w-full transition-transform duration-150 ease-out active:scale-[0.98]"
                 onClick={() => setOpen(false)}
                 render={<Link href="/checkout" />}
               >
                 Checkout — {formatPrice(subtotal, currency)}
-              </Button>
+              </Button>}
               <Separator className="my-1" />
               <button
                 type="button"

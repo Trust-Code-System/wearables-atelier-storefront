@@ -4,9 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { Menu, ShoppingBag, Search, ArrowUpRight, Truck, Heart, UserRound } from "lucide-react";
 import { useCart, useCatalog, useCurrency, useSettings } from "@/lib/store";
 import { formatPrice } from "@/lib/format";
+import { Tip, WarmGroup } from "@/components/micro/warm-tooltip";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,7 +25,37 @@ function CurrencyControl() {
 }
 
 function NavigationLinks({ activeHref }: { activeHref?: string }) {
-  return <nav className="store-desktop-nav" aria-label="Main navigation">{NAV.map((item) => <Link key={item.href} href={item.href} className={activeHref === item.href ? "is-active" : ""} aria-current={activeHref === item.href ? "page" : undefined}>{item.label}</Link>)}</nav>;
+  const [hovered, setHovered] = useState<string | null>(null);
+  const reduce = useReducedMotion();
+  // Rubber Segment: one pill glides to the hovered link, and rests on the
+  // active page when the pointer leaves. Shared layoutId keeps it a single
+  // element travelling between links on a spring.
+  const target = hovered ?? activeHref ?? null;
+  return (
+    <nav className="store-desktop-nav" aria-label="Main navigation" onMouseLeave={() => setHovered(null)}>
+      {NAV.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className={activeHref === item.href ? "is-active" : ""}
+          aria-current={activeHref === item.href ? "page" : undefined}
+          onMouseEnter={() => setHovered(item.href)}
+          onFocus={() => setHovered(item.href)}
+          onBlur={() => setHovered(null)}
+        >
+          {target === item.href && (
+            <motion.span
+              layoutId="store-nav-glide"
+              className="store-nav-glide"
+              aria-hidden
+              transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }}
+            />
+          )}
+          <span className="relative z-[1]">{item.label}</span>
+        </Link>
+      ))}
+    </nav>
+  );
 }
 
 function DesktopNavigation() {
@@ -43,6 +75,7 @@ export function SiteHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [headerHidden, setHeaderHidden] = useState(false);
+  const reduceMotion = useReducedMotion() ?? false;
   const matching = products.filter((product) => `${product.name} ${product.category}`.toLowerCase().includes(query.toLowerCase())).slice(0, 8);
 
   useEffect(() => {
@@ -92,13 +125,21 @@ export function SiteHeader() {
         </Sheet>
         <Link href="/" className="store-wordmark" aria-label="Wearables Atelier home"><Image src="/brand/wearables-by-ashabi.png" alt="Wearables by Ashabi" width={844} height={351} priority className="store-brand-logo" sizes="(max-width: 767px) 120px, 156px" /></Link>
         <Suspense fallback={<NavigationLinks />}><DesktopNavigation /></Suspense>
-        <div className="store-header-actions">
-          <span className="store-desktop-currency"><CurrencyControl /></span>
-          <Link href="/wishlist" className="store-icon-button store-personal-link" aria-label="Wishlist"><Heart size={18} strokeWidth={1.7} aria-hidden /></Link>
-          <Link href="/account" className="store-icon-button store-personal-link store-account-link" aria-label="Your account"><UserRound size={18} strokeWidth={1.7} aria-hidden /></Link>
-          <button className="store-icon-button store-search-trigger" aria-label="Search the collection" onClick={() => setSearchOpen(true)}><Search size={18} strokeWidth={1.7} aria-hidden /><span>Search</span></button>
-          <button className="store-bag-button" aria-label={`Open shopping bag, ${count} ${count === 1 ? "item" : "items"}`} onClick={() => setOpen(true)}><ShoppingBag size={18} strokeWidth={1.7} aria-hidden /><span className="store-bag-text">Bag</span><span className="store-bag-count">{count}</span></button>
-        </div>
+        <WarmGroup>
+          <div className="store-header-actions">
+            <span className="store-desktop-currency"><CurrencyControl /></span>
+            <Tip label="Wishlist">
+              <Link href="/wishlist" className="store-icon-button store-personal-link" aria-label="Wishlist"><Heart size={18} strokeWidth={1.7} aria-hidden /></Link>
+            </Tip>
+            <Tip label="Your account">
+              <Link href="/account" className="store-icon-button store-personal-link store-account-link" aria-label="Your account"><UserRound size={18} strokeWidth={1.7} aria-hidden /></Link>
+            </Tip>
+            <Tip label="Search ⌘K">
+              <button className="store-icon-button store-search-trigger" aria-label="Search the collection" onClick={() => setSearchOpen(true)}><Search size={18} strokeWidth={1.7} aria-hidden /><span>Search</span></button>
+            </Tip>
+            <button className="store-bag-button" aria-label={`Open shopping bag, ${count} ${count === 1 ? "item" : "items"}`} onClick={() => setOpen(true)}><ShoppingBag size={18} strokeWidth={1.7} aria-hidden /><span className="store-bag-text">Bag</span><motion.span key={count} className="store-bag-count" initial={reduceMotion ? false : { scale: 1.5 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 22 }}>{count}</motion.span></button>
+          </div>
+        </WarmGroup>
       </div>
       <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
         <DialogContent className="store-search-panel sm:max-w-xl" overlayClassName="store-search-backdrop" data-lenis-prevent>

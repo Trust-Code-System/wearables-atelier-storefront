@@ -6,6 +6,9 @@ import { ArrowDown, ArrowRight, ArrowUpRight } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useCatalog, useSettings } from "@/lib/store";
 import { ProductCard } from "@/components/shop/product-card";
+import { Magnetic } from "@/components/micro/magnetic";
+import { BlurText } from "@/components/micro/blur-text";
+import { BrandIntro } from "@/components/micro/brand-intro";
 import { formatPrice } from "@/lib/format";
 import type { ReactNode } from "react";
 import { brandContact } from "@/lib/brand-contact";
@@ -23,6 +26,7 @@ export default function HomePage() {
 
   return (
     <>
+      <BrandIntro />
       <section className="campaign-hero" aria-labelledby="campaign-title">
         <div className="campaign-image">
           <Image src="/collection/look-02.png" alt="Wearables by Ashabi embroidered occasionwear styled with a gold gele and shoulder sash" fill priority sizes="(min-width: 768px) 58vw, 100vw" className="object-cover" />
@@ -31,9 +35,9 @@ export default function HomePage() {
         <div className="campaign-topline"><span>The Ashabi edit</span><span>Culture · Luxury · Elegance</span></div>
         <div className="campaign-copy">
           <p className="store-label">From Lagos. For your moment.</p>
-          <h1 id="campaign-title">Wear it<br /><span>your way.</span></h1>
+          <h1 id="campaign-title"><BlurText text="Wear it" /><br /><BlurText text="your way." className="campaign-title-italic" delay={0.12} /></h1>
           <p className="campaign-description">Rich colour. Statement silhouettes.<br />Nigerian elegance, made personal.</p>
-          <Link href="/shop" className="store-button store-button-light">Discover the collection <ArrowUpRight size={17} aria-hidden /></Link>
+          <Magnetic strength={0.22}><Link href="/shop" className="store-button store-button-light">Discover the collection <ArrowUpRight size={17} aria-hidden /></Link></Magnetic>
         </div>
         <a href="#bestsellers" className="campaign-scroll" aria-label="Explore the collection below"><ArrowDown size={18} aria-hidden /><span>There’s more to discover</span></a>
         <span className="campaign-index" aria-hidden>01 — 26</span>
@@ -62,14 +66,14 @@ export default function HomePage() {
             <Image src="/collection/look-01.png" alt="Lime green Iro and Buba styled with a matching gele and embroidered sash" fill sizes="(min-width: 768px) 58vw, 100vw" className="object-cover" />
             <span className="collection-image-caption">Ready to wear</span>
           </Link>
-          <div className="collection-caption"><div><p className="store-label">Make room in your wardrobe</p><h2>Life, well dressed.</h2></div><Link href="/shop?category=clothing" className="store-round-link" aria-label="Shop clothing"><ArrowUpRight size={25} aria-hidden /></Link></div>
+          <div className="collection-caption"><div><p className="store-label">Make room in your wardrobe</p><h2>Life, well dressed.</h2></div><Magnetic strength={0.38}><Link href="/shop?category=clothing" className="store-round-link" aria-label="Shop clothing"><ArrowUpRight size={25} aria-hidden /></Link></Magnetic></div>
         </EditorialReveal>
         <EditorialReveal className="collection-jewelry">
           <Link href="/shop?category=jewelry" className="collection-image-link">
             <Image src="/collection/look-03.png" alt="Wearables by Ashabi look styled with a statement necklace, earrings and teal gele" fill sizes="(min-width: 768px) 42vw, 100vw" className="object-cover" />
             <span className="collection-image-caption">The finishing touch</span>
           </Link>
-          <div className="collection-caption"><div><p className="store-label">A little something, every day</p><h2>All in the details.</h2></div><Link href="/shop?category=jewelry" className="store-round-link" aria-label="Shop jewelry"><ArrowUpRight size={25} aria-hidden /></Link></div>
+          <div className="collection-caption"><div><p className="store-label">A little something, every day</p><h2>All in the details.</h2></div><Magnetic strength={0.38}><Link href="/shop?category=jewelry" className="store-round-link" aria-label="Shop jewelry"><ArrowUpRight size={25} aria-hidden /></Link></Magnetic></div>
         </EditorialReveal>
       </section>
 
