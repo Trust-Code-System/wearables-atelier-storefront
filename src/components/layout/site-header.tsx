@@ -89,8 +89,8 @@ export function SiteHeader() {
         setHeaderHidden(false);
         anchor = y;
       } else if (Math.abs(y - anchor) >= 12) {
-        // The requested direction is up to hide, down to reveal.
-        setHeaderHidden(y < anchor);
+        // Hide while moving down the page; reveal when returning upward.
+        setHeaderHidden(y > anchor);
         anchor = y;
       }
     };
