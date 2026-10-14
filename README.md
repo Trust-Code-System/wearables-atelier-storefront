@@ -14,6 +14,7 @@ Install and run with Node.js 22 LTS or newer:
 
 ```bash
 npm ci
+cp .env.example .env.local
 npm run dev
 ```
 
@@ -21,12 +22,29 @@ Open [localhost:3100](http://localhost:3100). The separate admin app runs at [lo
 
 Verify with `npm run lint` and `npm run build`. Run the production build locally with `npm run start -- --port 3100`.
 
+### Backend configuration
+
+Both apps use the same public backend setting:
+
+```dotenv
+NEXT_PUBLIC_API_BASE_URL=https://api.staging.wearables.trustcodesystem.tech
+```
+
+Keep `.env.local` at the project root and out of Git. `.env.example` records the current staging address for new checkouts. Future API code can import `getApiBaseUrl` from `@/lib/api-config` and append the backend's confirmed endpoint path. The helper validates the setting and removes trailing slashes; it makes no network requests. No API prefix, authentication scheme or endpoint contract is assumed.
+
+Set the same key in each Vercel project's **Production**, **Preview** and **Development** environments for now. `NEXT_PUBLIC_` values are public and inlined at build time, so restart local development after changes and rebuild/redeploy hosted apps when this value changes. Replace the Production value when the production backend is available. Never store tokens or API keys in this setting.
+
+Configured in both projects under the `hello-76386237s-projects` Vercel workspace on 14 October 2026, for all three environments. Existing deployments need a new build to receive the setting.
+
+This prepares configuration only. Catalog, checkout, account and browser-storage behavior remain prototypes until their API integrations are implemented. Backend CORS and authentication must be configured when those integrations start.
+
 ### Structure and dependencies
 
 - `src/app/(store)` — home, shop, product, wishlist, contact, account and checkout routes.
 - `src/components/layout` — customer header and footer.
 - `src/components/cart` and `src/components/shop` — shopping interactions.
 - `src/lib/store.tsx` — read-only demo catalog/settings and browser-owned cart/checkout state.
+- `src/lib/api-config.ts` — validated public base URL for future API integration.
 - `public/brand` and `public/collection` — supplied brand logo and photography.
 
 Next.js 16.4, React 19, Tailwind 4, Base UI, Motion and Lenis. Dependencies and lockfile are local to this repository; no sibling folders, symlinks or shared workspaces are required. Google fonts are fetched during a clean production build. Brand assets are local; source attribution is in `docs/brand-assets.md` and `docs/storefront-design-research.md`.
