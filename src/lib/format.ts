@@ -12,13 +12,15 @@ export function formatPrice(amountNGN: number, currency: Currency): string {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
-      maximumFractionDigits: 0,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
     }).format(amountNGN / NGN_PER_USD);
   }
   return new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency: "NGN",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
   }).format(amountNGN);
 }
 

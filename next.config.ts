@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // NOTE: cacheComponents/partialPrefetching from the scaffold are disabled —
-  // the storefront is intentionally client-driven (localStorage stores) until
-  // the backend lands. Re-enable with `"use cache"` on real data fetching.
+  // catalog reads use no-store so unpublished products and expired signed URLs
+  // are not retained in a persistent Next.js cache.
   cacheComponents: false,
   partialPrefetching: false,
   turbopack: {

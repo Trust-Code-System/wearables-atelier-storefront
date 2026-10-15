@@ -5,9 +5,26 @@ import ts from "typescript";
 
 const source = readFileSync(new URL("../src/lib/stock.ts", import.meta.url), "utf8");
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext } }).outputText;
-const { stockLabel, addStockItem, setStockQuantity, cartHasStockIssues } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString("base64")}`);
+const { stockLabel, addStockItem, setStockQuantity, cartHasStockIssues, variantPrice } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString("base64")}`);
 const product = { id: "test-piece", stock: 8, sizes: [8, 10] };
 const line = (size, qty) => ({ productId: product.id, size, qty });
+
+test("live size prices and stock stay independent across bag lines", () => {
+  const live = { ...product, stock: 6, variants: [
+    { id: "v8", size: 8, priceNGN: 185000.05, available: 2 },
+    { id: "v10", size: 10, priceNGN: 210000, available: 4 },
+  ] };
+  assert.equal(variantPrice(live, 8), 185000.05);
+  assert.equal(variantPrice(live, 10), 210000);
+  const items = addStockItem([], live, 8, 2);
+  assert.deepEqual(addStockItem(items, live, 8, 1), items);
+  const both = addStockItem(items, live, 10, 4);
+  assert.equal(both.length, 2);
+  assert.equal(cartHasStockIssues(both, [live]), false);
+  assert.deepEqual(setStockQuantity(both, live, live.id, 8, 3), both);
+  assert.equal(cartHasStockIssues(both, [{ ...live, variants: [ { ...live.variants[0], available: 1 }, live.variants[1] ] }]), true);
+  assert.equal(cartHasStockIssues([line(8, 1), line(8, 2)], [live]), true);
+});
 
 test("availability uses the recorded total and singular/plural labels", () => {
   assert.equal(stockLabel(product), "8 pieces available");

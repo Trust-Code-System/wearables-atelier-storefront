@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { EASE_OUT } from "@/components/motion";
 import { SwipeRow } from "@/components/micro/swipe-row";
-import { canAddStock, cartHasStockIssues, cartProductQty, stockCount, stockLabel } from "@/lib/stock";
+import { canAddStock, cartHasStockIssues, variantStock, variantPrice, stockLabel } from "@/lib/stock";
 
 export function CartDrawer() {
   const { items, isOpen, setOpen, setQty, removeItem, count } = useCart();
@@ -31,7 +31,7 @@ export function CartDrawer() {
     return product ? [{ ...item, product }] : [];
   });
 
-  const subtotal = lines.reduce((sum, l) => sum + l.product.priceNGN * l.qty, 0);
+  const subtotal = lines.reduce((sum, l) => sum + variantPrice(l.product, l.size) * l.qty, 0);
   const toFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
   const progress = freeShippingThreshold > 0 ? Math.min(1, subtotal / freeShippingThreshold) : 1;
   const stockIssues = cartHasStockIssues(items, products);
@@ -121,6 +121,7 @@ export function CartDrawer() {
                     >
                       <Image
                         src={line.product.images[0]}
+                        unoptimized
                         alt={line.product.name}
                         fill
                         sizes="80px"
@@ -141,8 +142,8 @@ export function CartDrawer() {
                           <p className="mt-0.5 text-[0.75rem] text-muted-foreground">
                             {line.size !== null ? `Size ${line.size}` : "One size"}
                           </p>
-                          <p className="product-stock mt-1" data-unavailable={stockCount(line.product) === 0 || undefined}>{stockLabel(line.product)}</p>
-                          {cartProductQty(items, line.productId) > stockCount(line.product) && stockCount(line.product) > 0 && <p className="text-xs text-muted-foreground">Reduce the quantity to match available stock.</p>}
+                          <p className="product-stock mt-1" data-unavailable={variantStock(line.product, line.size) === 0 || undefined}>{stockLabel({ stock: variantStock(line.product, line.size) })}</p>
+                          {line.qty > variantStock(line.product, line.size) && variantStock(line.product, line.size) > 0 && <p className="text-xs text-muted-foreground">Reduce the quantity to match available stock.</p>}
                         </div>
                         <button
                           type="button"
@@ -170,7 +171,7 @@ export function CartDrawer() {
                           <button
                             type="button"
                             aria-label="Increase quantity"
-                            disabled={!canAddStock(items, line.product)}
+                            disabled={!canAddStock(items, line.product, 1, line.size)}
                             onClick={() => setQty(line.productId, line.size, line.qty + 1)}
                             className="grid size-7 place-items-center transition-all duration-150 ease-out hover:bg-muted active:scale-90"
                           >
@@ -178,7 +179,7 @@ export function CartDrawer() {
                           </button>
                         </div>
                         <p className="text-sm font-medium tabular-nums">
-                          {formatPrice(line.product.priceNGN * line.qty, currency)}
+                          {formatPrice(variantPrice(line.product, line.size) * line.qty, currency)}
                         </p>
                       </div>
                     </div>
