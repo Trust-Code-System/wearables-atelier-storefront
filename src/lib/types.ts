@@ -18,6 +18,16 @@ export interface Product {
   stock: number;
   badge?: Badge;
   createdAt: string;
+  /** Live catalog prices and available (on-hand minus reserved) units per size. */
+  variants?: ProductVariant[];
+}
+
+export interface ProductVariant {
+  id: string;
+  size: number | null;
+  priceNGN: number;
+  compareAtNGN?: number;
+  available: number;
 }
 
 export interface CartItem {

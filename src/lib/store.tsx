@@ -10,7 +10,8 @@ import {
   type ReactNode,
 } from "react";
 import type { CartItem, Currency, Order, Product } from "@/lib/types";
-import { seedProducts, migrateBrandCatalog, legacyProductSlugIds } from "@/lib/products";
+import { usePathname } from "next/navigation";
+import { loadCatalog } from "@/lib/catalog-api";
 import { addStockItem, setStockQuantity } from "@/lib/stock";
 
 /* ------------------------------------------------------------------ */
@@ -140,37 +141,62 @@ export function useCurrency() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Read-only demo catalog (retains existing browser edits)            */
+/*  Live public catalog                                               */
 /* ------------------------------------------------------------------ */
 
 const CatalogContext = createContext<{
   products: Product[];
+  loading: boolean;
+  error: string;
   getProduct: (slug: string) => Product | undefined;
 } | null>(null);
 
 export function CatalogProvider({ children }: { children: ReactNode }) {
-  const [products] = usePersistentState<Product[]>(
-    "wa:catalog",
-    seedProducts,
-    migrateBrandCatalog,
-    false,
-  );
+  const pathname = usePathname();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController();
+    let request = 0;
+    const refresh = async () => {
+      const current = ++request;
+      try {
+        const loaded = await loadCatalog(controller.signal);
+        if (controller.signal.aborted || current !== request) return;
+        setProducts(loaded);
+        setError("");
+      } catch {
+        if (controller.signal.aborted || current !== request) return;
+        setProducts([]);
+        setError("The collection is temporarily unavailable. Please try again.");
+      } finally {
+        if (!controller.signal.aborted && current === request) setLoading(false);
+      }
+    };
+    void refresh();
+    const onFocus = () => { void refresh(); };
+    // Signed image URLs expire after 15 minutes; renew them before expiry.
+    const timer = window.setInterval(onFocus, 5 * 60 * 1000);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      controller.abort();
+      window.clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [pathname, retry]);
   const getProduct = useCallback(
-    (slug: string) => products.find((p) => p.slug === slug) ?? products.find((p) => p.id === legacyProductSlugIds[slug]),
+    (slug: string) => products.find((product) => product.slug === slug),
     [products],
   );
-
-  const value = useMemo(
-    () => ({
-      products,
-      getProduct,
-    }),
-    [products, getProduct],
-  );
-
-  return (
-    <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>
-  );
+  const value = useMemo(() => ({ products, getProduct, loading, error }), [products, getProduct, loading, error]);
+  return <CatalogContext.Provider value={value}>
+    {error && <div role="alert" className="border-b bg-muted p-4 text-center text-sm">
+      {error} <button type="button" className="underline" onClick={() => setRetry((value) => value + 1)}>Retry</button>
+    </div>}
+    {children}
+  </CatalogContext.Provider>;
 }
 
 export function useCatalog() {

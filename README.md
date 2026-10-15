@@ -30,32 +30,36 @@ Both apps use the same public backend setting:
 NEXT_PUBLIC_API_BASE_URL=https://api.staging.wearables.trustcodesystem.tech
 ```
 
-Keep `.env.local` at the project root and out of Git. `.env.example` records the current staging address for new checkouts. Future API code can import `getApiBaseUrl` from `@/lib/api-config` and append the backend's confirmed endpoint path. The helper validates the setting and removes trailing slashes; it makes no network requests. No API prefix, authentication scheme or endpoint contract is assumed.
+Keep `.env.local` at the project root and out of Git. `.env.example` records the current staging address for new checkouts. Catalog API code imports `getApiBaseUrl` from `@/lib/api-config` and append the backend's confirmed endpoint path. The helper validates the setting and removes trailing slashes; it makes no network requests. Public catalog reads use `/api/v1/store/products` and `/api/v1/store/products/:slug` without authentication.
 
 Set the same key in each Vercel project's **Production**, **Preview** and **Development** environments for now. `NEXT_PUBLIC_` values are public and inlined at build time, so restart local development after changes and rebuild/redeploy hosted apps when this value changes. Replace the Production value when the production backend is available. Never store tokens or API keys in this setting.
 
 Configured in both projects under the `hello-76386237s-projects` Vercel workspace on 14 October 2026, for all three environments. Existing deployments need a new build to receive the setting.
 
-This prepares configuration only. Catalog, checkout, account and browser-storage behavior remain prototypes until their API integrations are implemented. Backend CORS and authentication must be configured when those integrations start.
+Catalog reads are connected. Include the storefront origin in backend CORS. Local development can use `NEXT_PUBLIC_API_BASE_URL=http://localhost:3000` with the backend running and `http://localhost:3100` in its CORS allow-list.
 
 ### Structure and dependencies
 
 - `src/app/(store)` — home, shop, product, wishlist, contact, account and checkout routes.
 - `src/components/layout` — customer header and footer.
 - `src/components/cart` and `src/components/shop` — shopping interactions.
-- `src/lib/store.tsx` — read-only demo catalog/settings and browser-owned cart/checkout state.
-- `src/lib/api-config.ts` — validated public base URL for future API integration.
+- `src/lib/store.tsx` — live public catalog, demo settings and browser-owned cart/checkout state.
+- `src/lib/api-config.ts` — validated public API base URL.
 - `public/brand` and `public/collection` — supplied brand logo and photography.
 
 Next.js 16.4, React 19, Tailwind 4, Base UI, Motion and Lenis. Dependencies and lockfile are local to this repository; no sibling folders, symlinks or shared workspaces are required. Google fonts are fetched during a clean production build. Brand assets are local; source attribution is in `docs/brand-assets.md` and `docs/storefront-design-research.md`.
 
 ### Current data boundary
 
-This is a browser-storage prototype. The owner explicitly chose to split the apps first and add a shared backend later. Admin changes and customer orders **do not sync across the two sites**. Checkout payment remains simulated.
+Catalog data comes from the shared backend. Published admin products appear in the shop, home recommendations, search and wishlist; drafts and archived products stay hidden. Product URLs return 404 for missing/unpublished products. The provider traverses API pagination and ignores the old `wa:catalog` sample data. It refreshes on navigation, window focus and every five minutes to renew signed image URLs. API failures show a retry message instead of sample products.
+
+Size selection uses each variant's NGN price and available quantity (on-hand minus reserved). The bag uses the selected size's price and limit. Product cards show the lowest variant price with “From” when prices differ. Signed images are rendered directly so Next's optimizer does not cache expired signatures.
+
+Cart and wishlist remain browser-owned. Checkout payment and order creation remain simulated: adding to the bag does not reserve or reduce database stock. Checkout reservations, server-side repricing and payments are separate work. The USD option still uses the existing display-only conversion rate.
 
 Wishlist hearts on cards and product pages save product IDs in this browser. Account, login and registration pages are prepared for the next authentication phase: they clearly indicate that online accounts are not yet available. They do not transmit or store passwords, create accounts, or simulate an authenticated session. Contact buttons use the original brand's WhatsApp destination; Instagram, TikTok, YouTube and maps links were copied from its public footer.
 
-Existing browser data stays on its original origin; this split does not clear it. Read-only catalog/settings hydration preserves existing custom catalog data and exposes only public settings. Seeded admin order history and catalog-management actions are absent from this app. The new admin origin starts with its own demo data.
+Existing browser data is not deleted. Old sample catalog entries are ignored; old cart lines whose product IDs are no longer available can be removed from the bag. Settings still expose only public values. Catalog-management actions belong to the separate admin app.
 
 See `docs/project-separation.md` for the backend and migration boundary.
 
@@ -63,4 +67,4 @@ See `docs/project-separation.md` for the backend and migration boundary.
 
 Import **this repository** as one Next.js project on Vercel or another Next.js/Node.js host. Use repository root `.` as the project directory, `npm ci` to install and `npm run build` to build. The admin repository must be imported as a second project with its own environment settings and address. GitHub Pages is unsuitable for this app's dynamic routes.
 
-The source repositories are public at the owner's request. The storefront is deployed as its own Vercel project under Trustcode System, with Git integration on `main`. Before using the two sites for real commerce, connect the shared backend, server-side order/payment validation and admin authentication.
+The source repositories are public at the owner's request. The storefront is deployed as its own Vercel project under Trustcode System, with Git integration on `main`. Server-side order/payment validation and checkout inventory orchestration remain necessary before accepting real orders.

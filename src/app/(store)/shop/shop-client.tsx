@@ -193,7 +193,7 @@ export function ShopClient() {
 }
 
 function ShopCollection({ categoryParam, sortParam }: { categoryParam: string | null; sortParam: string | null }) {
-  const { products } = useCatalog();
+  const { products, loading, error } = useCatalog();
 
   const initialCategory = (categoryParam ?? "all") as CategoryFilter;
   const [category, setCategory] = useState<CategoryFilter>(
@@ -219,7 +219,7 @@ function ShopCollection({ categoryParam, sortParam }: { categoryParam: string | 
     const range = PRICE_RANGES.find((r) => r.id === priceRange) ?? PRICE_RANGES[0];
     let list = products.filter((p) => {
       if (category !== "all" && p.category !== category) return false;
-      if (sizes.length > 0 && !p.sizes.some((s) => sizes.includes(s))) return false;
+      if (sizes.length > 0 && !p.sizes.some((s) => sizes.includes(s) && (!p.variants || p.variants.some((variant) => variant.size === s && variant.available > 0)))) return false;
       if (!range.test(p.priceNGN)) return false;
       return true;
     });
@@ -323,11 +323,11 @@ function ShopCollection({ categoryParam, sortParam }: { categoryParam: string | 
 
         {/* Grid */}
         <div>
-          {filtered.length === 0 ? (
+          {loading || error ? <p role="status" className="py-16 text-center">{loading ? "Loading the collection…" : "Please retry loading the collection above."}</p> : filtered.length === 0 ? (
             <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed py-24 text-center">
-              <p className="font-display text-xl">Nothing matches those filters</p>
+              <p className="font-display text-xl">{products.length ? "Nothing matches those filters" : "The collection is coming soon"}</p>
               <p className="max-w-xs text-sm text-muted-foreground">
-                Try widening the price range or clearing a size or two.
+                {products.length ? "Try widening the price range or clearing a size or two." : "Check back soon for new pieces."}
               </p>
               <Button variant="outline" onClick={clearAll}>
                 Clear all filters

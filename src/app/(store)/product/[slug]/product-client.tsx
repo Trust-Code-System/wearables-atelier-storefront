@@ -21,10 +21,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
-import { canAddStock, cartProductQty, stockCount, stockLabel } from "@/lib/stock";
+import { canAddStock, remainingStock, variantStock, variantPrice, stockCount, stockLabel } from "@/lib/stock";
 
 export function ProductClient({ slug }: { slug: string }) {
-  const { products, getProduct } = useCatalog();
+  const { products, getProduct, loading, error } = useCatalog();
   const { items, addItem, setOpen } = useCart();
 
   const product = getProduct(slug);
@@ -42,6 +42,8 @@ export function ProductClient({ slug }: { slug: string }) {
       .slice(0, 4);
   }, [products, product]);
 
+  if (loading || error) return <div role="status" className="px-6 py-24 text-center">{error ? "Please retry loading the collection above." : "Loading this piece…"}</div>;
+
   if (!product) {
     return (
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-4 py-32 text-center">
@@ -56,8 +58,9 @@ export function ProductClient({ slug }: { slug: string }) {
 
   const oneSize = product.sizes.length === 0;
   const soldOut = stockCount(product) === 0;
-  const remainingForBag = Math.max(0, stockCount(product) - cartProductQty(items, product.id));
-  const canAdd = canAddStock(items, product, qty);
+  const selectedVariant = product.variants?.find((variant) => variant.size === size);
+  const remainingForBag = remainingStock(items, product, size);
+  const canAdd = !oneSize && size === null ? !soldOut : canAddStock(items, product, qty, size);
 
   const handleAdd = () => {
     if (!canAdd) return;
@@ -106,7 +109,8 @@ export function ProductClient({ slug }: { slug: string }) {
                 transition={{ duration: 0.35, ease: [...EASE_OUT] }}
               >
                 <Image
-                  src={product.images[imageIndex]}
+                  src={product.images[imageIndex] ?? product.images[0]}
+                  unoptimized
                   alt={product.name}
                   fill
                   priority
@@ -138,7 +142,7 @@ export function ProductClient({ slug }: { slug: string }) {
                       : "opacity-60 hover:opacity-100",
                   )}
                 >
-                  <Image src={src} alt="" fill sizes="80px" className="object-cover" />
+                  <Image src={src} alt="" unoptimized fill sizes="80px" className="object-cover" />
                 </button>
               ))}
             </div>
@@ -153,13 +157,13 @@ export function ProductClient({ slug }: { slug: string }) {
               {product.name}
             </h1>
             <Price
-              amountNGN={product.priceNGN}
-              compareAtNGN={soldOut ? undefined : product.compareAtNGN}
+              amountNGN={variantPrice(product, size)}
+              compareAtNGN={soldOut ? undefined : selectedVariant?.compareAtNGN ?? (size === null ? product.compareAtNGN : undefined)}
               className="text-lg"
             />
             <div className="product-stock-detail" data-unavailable={soldOut || undefined}>
-              <p className="product-stock">{stockLabel(product)}</p>
-              <p>{soldOut ? "You can still save this piece to your wishlist." : oneSize ? "Available in the collection." : "Total across all sizes. Choose your size below."}</p>
+              <p className="product-stock">{stockLabel(selectedVariant ? { stock: selectedVariant.available } : product)}</p>
+              <p>{soldOut ? "You can still save this piece to your wishlist." : oneSize ? "Available in the collection." : size === null ? "Total across all sizes. Choose your size below." : `Available in size ${size}.`}</p>
             </div>
           </div>
 
@@ -204,9 +208,10 @@ export function ProductClient({ slug }: { slug: string }) {
                       type="button"
                       role="radio"
                       aria-checked={selected}
-                      disabled={soldOut}
+                      disabled={variantStock(product, s) === 0}
                       onClick={() => {
                         setSize(s);
+                        setQtyLocal(1);
                         setSizeError(false);
                       }}
                       initial={false}

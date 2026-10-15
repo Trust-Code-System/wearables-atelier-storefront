@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { cartHasStockIssues } from "@/lib/stock";
+import { variantPrice, cartHasStockIssues } from "@/lib/stock";
 
 type Step = 0 | 1 | 2;
 const STEPS = ["Information", "Delivery", "Payment"] as const;
@@ -96,7 +96,7 @@ export default function CheckoutPage() {
     [items, products],
   );
 
-  const subtotal = lines.reduce((sum, l) => sum + l.product.priceNGN * l.qty, 0);
+  const subtotal = lines.reduce((sum, l) => sum + variantPrice(l.product, l.size) * l.qty, 0);
   const freeShipping = subtotal >= settings.freeShippingThresholdNGN;
   const deliveryFee = freeShipping
     ? 0
@@ -146,7 +146,7 @@ export default function CheckoutPage() {
           name: l.product.name,
           size: l.size,
           qty: l.qty,
-          priceNGN: l.product.priceNGN,
+          priceNGN: variantPrice(l.product, l.size),
         })),
         totalNGN: total,
         status: "paid",
@@ -458,7 +458,7 @@ export default function CheckoutPage() {
             {lines.map((line) => (
               <div key={`${line.productId}-${line.size ?? "os"}`} className="flex items-center gap-3">
                 <div className="relative aspect-[4/5] w-12 shrink-0 overflow-hidden rounded-md bg-muted">
-                  <Image src={line.product.images[0]} alt={line.product.name} fill sizes="48px" className="object-cover" />
+                  <Image src={line.product.images[0]} unoptimized alt={line.product.name} fill sizes="48px" className="object-cover" />
                   <span className="absolute top-0.5 right-0.5 grid size-4 place-items-center rounded-full bg-espresso text-[0.5625rem] font-semibold text-espresso-foreground tabular-nums">
                     {line.qty}
                   </span>
@@ -470,7 +470,7 @@ export default function CheckoutPage() {
                   </p>
                 </div>
                 <p className="text-[0.8125rem] tabular-nums">
-                  {formatPrice(line.product.priceNGN * line.qty, currency)}
+                  {formatPrice(variantPrice(line.product, line.size) * line.qty, currency)}
                 </p>
               </div>
             ))}
