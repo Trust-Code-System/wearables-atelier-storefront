@@ -51,7 +51,7 @@ Next.js 16.4, React 19, Tailwind 4, Base UI, Motion and Lenis. Dependencies and 
 
 ### Current data boundary
 
-Catalog data comes from the shared backend. Published admin products appear in the shop, home recommendations, search and wishlist; drafts and archived products stay hidden. Product URLs return 404 for missing/unpublished products. The provider traverses API pagination and ignores the old `wa:catalog` sample data. It refreshes on navigation, window focus and every five minutes to renew signed image URLs. API failures show a retry message instead of sample products.
+Catalog data comes from the shared backend. Published admin products appear in the shop, home recommendations, search and wishlist; drafts and archived products stay hidden. Product URLs return 404 for missing/unpublished products. The shared catalog provider traverses API pagination for the bag, search and recommendations and ignores the old `wa:catalog` sample data. The shop independently requests server-filtered pages of 12 products. It refreshes on navigation, window focus and every five minutes to renew signed image URLs. API failures show a retry message instead of sample products.
 
 Size selection uses each variant's NGN price and available quantity (on-hand minus reserved). The bag uses the selected size's price and limit. Product cards show the lowest variant price with “From” when prices differ. Signed images are rendered directly so Next's optimizer does not cache expired signatures.
 
@@ -68,3 +68,16 @@ See `docs/project-separation.md` for the backend and migration boundary.
 Import **this repository** as one Next.js project on Vercel or another Next.js/Node.js host. Use repository root `.` as the project directory, `npm ci` to install and `npm run build` to build. The admin repository must be imported as a second project with its own environment settings and address. GitHub Pages is unsuitable for this app's dynamic routes.
 
 The source repositories are public at the owner's request. The storefront is deployed as its own Vercel project under Trustcode System, with Git integration on `main`. Server-side order/payment validation and checkout inventory orchestration remain necessary before accepting real orders.
+
+### Shop filtering and sorting
+
+The existing category, numbered size and price controls query the public catalog API.
+Size filters match any selected size with positive available stock; archived variants
+are excluded. Price bands use the lowest active variant price: below ₦100,000,
+₦100,000 through ₦200,000 inclusive, or above ₦200,000. Prices are compared as
+integer kobo in PostgreSQL. Sorting supports featured (bestsellers first), newest,
+and price ascending/descending, with deterministic ties. Previous/Next controls
+paginate the matching results; changing filters/sort resets to page 1. Signed image
+URLs refresh on focus and every five minutes. API errors offer a retry.
+
+Deploy the matching backend filtering endpoints before this frontend change.

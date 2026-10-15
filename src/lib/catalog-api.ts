@@ -129,3 +129,36 @@ export async function loadProduct(slug: string): Promise<Product | null> {
     );
   return mapProduct((await response.json()) as PublicProduct);
 }
+
+export type CatalogQuery = {
+  category?: string;
+  sizes?: number[];
+  priceRange?: string;
+  sort?: string;
+  page?: number;
+  limit?: number;
+};
+export async function loadCatalogPage(
+  query: CatalogQuery,
+  signal?: AbortSignal,
+) {
+  const params = new URLSearchParams({
+    page: String(query.page ?? 1),
+    limit: String(query.limit ?? 12),
+  });
+  if (query.category && query.category !== "all")
+    params.set("category", query.category);
+  if (query.sizes?.length) params.set("sizes", query.sizes.join(","));
+  if (query.priceRange) params.set("priceRange", query.priceRange);
+  if (query.sort) params.set("sort", query.sort);
+  const response = await publicFetch(`?${params}`, signal);
+  if (!response.ok)
+    throw new Error(
+      "The collection is temporarily unavailable. Please try again.",
+    );
+  const body = (await response.json()) as {
+    data: PublicProduct[];
+    meta: { total: number; totalPages: number; page: number };
+  };
+  return { data: body.data.map(mapProduct), meta: body.meta };
+}

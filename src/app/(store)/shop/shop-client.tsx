@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { SlidersHorizontalIcon, XIcon } from "lucide-react";
 import type { Category } from "@/lib/types";
-import { useCatalog } from "@/lib/store";
+import { loadCatalogPage } from "@/lib/catalog-api";
+import type { Product } from "@/lib/types";
 import { CLOTHING_SIZES } from "@/lib/products";
 import { EASE_OUT } from "@/components/motion";
 import { ProductCard } from "@/components/shop/product-card";
@@ -42,37 +43,74 @@ const SORT_OPTIONS = [
 const COLLECTION_INTROS = {
   all: {
     title: "The Ashabi edit.",
-    description: "Nigerian occasionwear and statement jewellery. Culture, luxury and elegance, brought together.",
+    description:
+      "Nigerian occasionwear and statement jewellery. Culture, luxury and elegance, brought together.",
     caption: "Occasionwear & statement jewellery",
     images: [
-      { src: "/collection/look-06.png", alt: "Rust and teal occasionwear with a coordinated gele and sash" },
-      { src: "/collection/look-03.png", alt: "Gold statement necklace and earrings styled with teal gele" },
+      {
+        src: "/collection/look-06.png",
+        alt: "Rust and teal occasionwear with a coordinated gele and sash",
+      },
+      {
+        src: "/collection/look-03.png",
+        alt: "Gold statement necklace and earrings styled with teal gele",
+      },
     ],
   },
   clothing: {
     title: "Clothing",
-    description: "Iro & Buba, occasionwear and coordinated headwraps. Find your look for the moments that matter.",
+    description:
+      "Iro & Buba, occasionwear and coordinated headwraps. Find your look for the moments that matter.",
     caption: "Iro & Buba · Occasionwear",
     images: [
-      { src: "/collection/look-01.png", alt: "Lime Iro and Buba with a matching headwrap and embroidered sash" },
-      { src: "/collection/look-06.png", alt: "Ashabi occasion look in rust and teal" },
+      {
+        src: "/collection/look-01.png",
+        alt: "Lime Iro and Buba with a matching headwrap and embroidered sash",
+      },
+      {
+        src: "/collection/look-06.png",
+        alt: "Ashabi occasion look in rust and teal",
+      },
     ],
   },
   jewelry: {
     title: "Jewelry",
-    description: "Statement necklaces, earrings and bracelets, styled with the Ashabi collection.",
+    description:
+      "Statement necklaces, earrings and bracelets, styled with the Ashabi collection.",
     caption: "The finishing touch",
     images: [
-      { src: "/collection/look-03.png", alt: "Statement necklace, earrings and bracelets styled with the Ashabi collection" },
-      { src: "/collection/look-05.png", alt: "Crystal jewellery styled with lime occasionwear" },
+      {
+        src: "/collection/look-03.png",
+        alt: "Statement necklace, earrings and bracelets styled with the Ashabi collection",
+      },
+      {
+        src: "/collection/look-05.png",
+        alt: "Crystal jewellery styled with lime occasionwear",
+      },
     ],
   },
-} satisfies Record<CategoryFilter, { title: string; description: string; caption: string; images: { src: string; alt: string }[] }>;
+} satisfies Record<
+  CategoryFilter,
+  {
+    title: string;
+    description: string;
+    caption: string;
+    images: { src: string; alt: string }[];
+  }
+>;
 
 const PRICE_RANGES = [
   { id: "all", label: "All prices", test: () => true },
-  { id: "under-100", label: "Under ₦100,000", test: (p: number) => p < 100_000 },
-  { id: "100-200", label: "₦100,000 – ₦200,000", test: (p: number) => p >= 100_000 && p <= 200_000 },
+  {
+    id: "under-100",
+    label: "Under ₦100,000",
+    test: (p: number) => p < 100_000,
+  },
+  {
+    id: "100-200",
+    label: "₦100,000 – ₦200,000",
+    test: (p: number) => p >= 100_000 && p <= 200_000,
+  },
   { id: "over-200", label: "Over ₦200,000", test: (p: number) => p > 200_000 },
 ] as const;
 
@@ -116,15 +154,22 @@ function Filters({
         <ToggleGroup
           value={[category]}
           onValueChange={(v) => {
-            const next = (Array.isArray(v) ? v[0] : v) as CategoryFilter | undefined;
+            const next = (Array.isArray(v) ? v[0] : v) as
+              CategoryFilter | undefined;
             if (next) setCategory(next);
           }}
           variant="outline"
           className="w-full"
         >
-          <ToggleGroupItem value="all" className="flex-1">All</ToggleGroupItem>
-          <ToggleGroupItem value="clothing" className="flex-1">Clothing</ToggleGroupItem>
-          <ToggleGroupItem value="jewelry" className="flex-1">Jewelry</ToggleGroupItem>
+          <ToggleGroupItem value="all" className="flex-1">
+            All
+          </ToggleGroupItem>
+          <ToggleGroupItem value="clothing" className="flex-1">
+            Clothing
+          </ToggleGroupItem>
+          <ToggleGroupItem value="jewelry" className="flex-1">
+            Jewelry
+          </ToggleGroupItem>
         </ToggleGroup>
       </div>
 
@@ -189,25 +234,45 @@ function Filters({
 
 export function ShopClient() {
   const searchParams = useSearchParams();
-  return <ShopCollection key={searchParams.toString()} categoryParam={searchParams.get("category")} sortParam={searchParams.get("sort")} />;
+  return (
+    <ShopCollection
+      key={searchParams.toString()}
+      categoryParam={searchParams.get("category")}
+      sortParam={searchParams.get("sort")}
+    />
+  );
 }
 
-function ShopCollection({ categoryParam, sortParam }: { categoryParam: string | null; sortParam: string | null }) {
-  const { products, loading, error } = useCatalog();
-
+function ShopCollection({
+  categoryParam,
+  sortParam,
+}: {
+  categoryParam: string | null;
+  sortParam: string | null;
+}) {
   const initialCategory = (categoryParam ?? "all") as CategoryFilter;
   const [category, setCategory] = useState<CategoryFilter>(
-    ["all", "clothing", "jewelry"].includes(initialCategory) ? initialCategory : "all",
+    ["all", "clothing", "jewelry"].includes(initialCategory)
+      ? initialCategory
+      : "all",
   );
   const [sizes, setSizes] = useState<number[]>([]);
   const [priceRange, setPriceRange] = useState<string>("all");
-  const [sort, setSort] = useState<Sort>(["newest", "price-asc", "price-desc"].includes(sortParam ?? "") ? sortParam as Sort : "featured");
+  const [sort, setSort] = useState<Sort>(
+    ["newest", "price-asc", "price-desc"].includes(sortParam ?? "")
+      ? (sortParam as Sort)
+      : "featured",
+  );
 
   const toggleSize = (s: number) =>
-    setSizes((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
+    setSizes((prev) =>
+      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
+    );
 
   const activeCount =
-    (category !== "all" ? 1 : 0) + sizes.length + (priceRange !== "all" ? 1 : 0);
+    (category !== "all" ? 1 : 0) +
+    sizes.length +
+    (priceRange !== "all" ? 1 : 0);
 
   const clearAll = () => {
     setCategory("all");
@@ -215,31 +280,59 @@ function ShopCollection({ categoryParam, sortParam }: { categoryParam: string | 
     setPriceRange("all");
   };
 
-  const filtered = useMemo(() => {
-    const range = PRICE_RANGES.find((r) => r.id === priceRange) ?? PRICE_RANGES[0];
-    let list = products.filter((p) => {
-      if (category !== "all" && p.category !== category) return false;
-      if (sizes.length > 0 && !p.sizes.some((s) => sizes.includes(s) && (!p.variants || p.variants.some((variant) => variant.size === s && variant.available > 0)))) return false;
-      if (!range.test(p.priceNGN)) return false;
-      return true;
-    });
-    switch (sort) {
-      case "newest":
-        list = [...list].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-        break;
-      case "price-asc":
-        list = [...list].sort((a, b) => a.priceNGN - b.priceNGN);
-        break;
-      case "price-desc":
-        list = [...list].sort((a, b) => b.priceNGN - a.priceNGN);
-        break;
-      default:
-        list = [...list].sort(
-          (a, b) => Number(b.badge === "bestseller") - Number(a.badge === "bestseller"),
-        );
-    }
-    return list;
-  }, [products, category, sizes, priceRange, sort]);
+  const filterKey = JSON.stringify({ category, sizes, priceRange, sort });
+  const [pagination, setPagination] = useState({ key: "", page: 1 });
+  const page = pagination.key === filterKey ? pagination.page : 1;
+  const queryKey = JSON.stringify({ category, sizes, priceRange, sort, page });
+  const [retry, setRetry] = useState(0);
+  const [result, setResult] = useState<{
+    key: string;
+    data: Product[];
+    total: number;
+    pages: number;
+    error: string;
+  }>({ key: "", data: [], total: 0, pages: 0, error: "" });
+  useEffect(() => {
+    const controller = new AbortController();
+    const query = JSON.parse(queryKey);
+    let request = 0;
+    const refresh = () => {
+      const current = ++request;
+      void loadCatalogPage(query, controller.signal)
+        .then((body) => {
+          if (!controller.signal.aborted && current === request)
+            setResult({
+              key: queryKey,
+              data: body.data,
+              total: body.meta.total,
+              pages: body.meta.totalPages,
+              error: "",
+            });
+        })
+        .catch(() => {
+          if (!controller.signal.aborted && current === request)
+            setResult({
+              key: queryKey,
+              data: [],
+              total: 0,
+              pages: 0,
+              error:
+                "The collection is temporarily unavailable. Please try again.",
+            });
+        });
+    };
+    refresh();
+    window.addEventListener("focus", refresh);
+    const timer = window.setInterval(refresh, 5 * 60 * 1000);
+    return () => {
+      controller.abort();
+      window.removeEventListener("focus", refresh);
+      window.clearInterval(timer);
+    };
+  }, [queryKey, retry]);
+  const loading = result.key !== queryKey;
+  const error = loading ? "" : result.error;
+  const filtered = loading ? [] : result.data;
 
   const filtersProps = {
     category,
@@ -257,28 +350,58 @@ function ShopCollection({ categoryParam, sortParam }: { categoryParam: string | 
     <div className="store-catalog">
       {/* Page header */}
       <div className="store-catalog-header">
-        <section className="catalog-intro" aria-labelledby="collection-title" data-collection={category}>
+        <section
+          className="catalog-intro"
+          aria-labelledby="collection-title"
+          data-collection={category}
+        >
           <div className="catalog-intro-copy">
             <p className="store-label">Wearables Atelier / The collection</p>
-            <h1 id="collection-title" className="font-display">{intro.title}</h1>
+            <h1 id="collection-title" className="font-display">
+              {intro.title}
+            </h1>
             <p className="catalog-description">{intro.description}</p>
-            <p className="catalog-intro-note">From Lagos.<span>For your moment.</span></p>
+            <p className="catalog-intro-note">
+              From Lagos.<span>For your moment.</span>
+            </p>
           </div>
           <div className="catalog-intro-photos">
-            {intro.images.map((image, index) => <div className={`catalog-intro-photo catalog-intro-photo-${index + 1}`} key={image.src}>
-              <Image src={image.src} alt={image.alt} fill priority sizes={index === 0 ? "(max-width: 767px) 60vw, 28vw" : "(max-width: 767px) 36vw, 19vw"} />
-            </div>)}
+            {intro.images.map((image, index) => (
+              <div
+                className={`catalog-intro-photo catalog-intro-photo-${index + 1}`}
+                key={image.src}
+              >
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  fill
+                  priority
+                  sizes={
+                    index === 0
+                      ? "(max-width: 767px) 60vw, 28vw"
+                      : "(max-width: 767px) 36vw, 19vw"
+                  }
+                />
+              </div>
+            ))}
             <span className="catalog-intro-caption">{intro.caption}</span>
           </div>
         </section>
         <div className="catalog-toolbar">
-          <p className="catalog-piece-count"><span>{filtered.length}</span> {filtered.length === 1 ? "piece" : "pieces"} to discover</p>
+          <p className="catalog-piece-count">
+            <span>{loading ? "…" : result.total}</span>{" "}
+            {result.total === 1 ? "piece" : "pieces"} to discover
+          </p>
           <div className="catalog-toolbar-actions">
             {/* Mobile filters */}
             <Sheet>
               <SheetTrigger
                 render={
-                  <Button variant="outline" className="lg:hidden" aria-label="Open filters" />
+                  <Button
+                    variant="outline"
+                    className="lg:hidden"
+                    aria-label="Open filters"
+                  />
                 }
               >
                 <SlidersHorizontalIcon data-icon="inline-start" />
@@ -289,9 +412,16 @@ function ShopCollection({ categoryParam, sortParam }: { categoryParam: string | 
                   </span>
                 )}
               </SheetTrigger>
-              <SheetContent side="left" className="store-menu-panel w-80 overflow-y-auto" overlayClassName="store-sheet-backdrop" data-lenis-prevent>
+              <SheetContent
+                side="left"
+                className="store-menu-panel w-80 overflow-y-auto"
+                overlayClassName="store-sheet-backdrop"
+                data-lenis-prevent
+              >
                 <SheetHeader>
-                  <SheetTitle className="font-display text-lg">Refine</SheetTitle>
+                  <SheetTitle className="font-display text-lg">
+                    Refine
+                  </SheetTitle>
                 </SheetHeader>
                 <div className="px-4 pb-6">
                   <Filters {...filtersProps} />
@@ -299,13 +429,21 @@ function ShopCollection({ categoryParam, sortParam }: { categoryParam: string | 
               </SheetContent>
             </Sheet>
 
-            <Select items={SORT_OPTIONS} value={sort} onValueChange={(v) => setSort(v as Sort)}>
+            <Select
+              items={SORT_OPTIONS}
+              value={sort}
+              onValueChange={(v) => setSort(v as Sort)}
+            >
               <SelectTrigger className="w-44" aria-label="Sort products">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {SORT_OPTIONS.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
+                  {SORT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -323,18 +461,44 @@ function ShopCollection({ categoryParam, sortParam }: { categoryParam: string | 
 
         {/* Grid */}
         <div>
-          {loading || error ? <p role="status" className="py-16 text-center">{loading ? "Loading the collection…" : "Please retry loading the collection above."}</p> : filtered.length === 0 ? (
+          {loading || error ? (
+            <p role="status" className="py-16 text-center">
+              {loading ? (
+                "Loading the collection…"
+              ) : (
+                <>
+                  {error}{" "}
+                  <button
+                    type="button"
+                    className="underline"
+                    onClick={() => setRetry((value) => value + 1)}
+                  >
+                    Retry
+                  </button>
+                </>
+              )}
+            </p>
+          ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed py-24 text-center">
-              <p className="font-display text-xl">{products.length ? "Nothing matches those filters" : "The collection is coming soon"}</p>
+              <p className="font-display text-xl">
+                {activeCount > 0
+                  ? "Nothing matches those filters"
+                  : "The collection is coming soon"}
+              </p>
               <p className="max-w-xs text-sm text-muted-foreground">
-                {products.length ? "Try widening the price range or clearing a size or two." : "Check back soon for new pieces."}
+                {activeCount > 0
+                  ? "Try widening the price range or clearing a size or two."
+                  : "Check back soon for new pieces."}
               </p>
               <Button variant="outline" onClick={clearAll}>
                 Clear all filters
               </Button>
             </div>
           ) : (
-            <motion.div layout className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 xl:grid-cols-4">
+            <motion.div
+              layout
+              className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 xl:grid-cols-4"
+            >
               <AnimatePresence mode="popLayout">
                 {filtered.map((product, i) => (
                   <motion.div
@@ -342,8 +506,16 @@ function ShopCollection({ categoryParam, sortParam }: { categoryParam: string | 
                     layout
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.15 } }}
-                    transition={{ duration: 0.4, ease: [...EASE_OUT], delay: Math.min(i * 0.04, 0.3) }}
+                    exit={{
+                      opacity: 0,
+                      scale: 0.97,
+                      transition: { duration: 0.15 },
+                    }}
+                    transition={{
+                      duration: 0.4,
+                      ease: [...EASE_OUT],
+                      delay: Math.min(i * 0.04, 0.3),
+                    }}
                   >
                     <ProductCard product={product} priority={i < 4} />
                   </motion.div>
@@ -353,6 +525,30 @@ function ShopCollection({ categoryParam, sortParam }: { categoryParam: string | 
           )}
         </div>
       </div>
+      {!loading && !error && result.pages > 1 && (
+        <nav
+          aria-label="Product pages"
+          className="flex items-center justify-center gap-4 py-8"
+        >
+          <Button
+            variant="outline"
+            disabled={page <= 1}
+            onClick={() => setPagination({ key: filterKey, page: page - 1 })}
+          >
+            Previous
+          </Button>
+          <span>
+            Page {page} of {result.pages}
+          </span>
+          <Button
+            variant="outline"
+            disabled={page >= result.pages}
+            onClick={() => setPagination({ key: filterKey, page: page + 1 })}
+          >
+            Next
+          </Button>
+        </nav>
+      )}
     </div>
   );
 }

@@ -16,7 +16,7 @@ const compile = (name) =>
 const dataUrl = (code) =>
   `data:text/javascript;base64,${Buffer.from(code).toString("base64")}`;
 const config = dataUrl(compile("api-config"));
-const { mapProduct, loadCatalog, loadProduct } = await import(
+const { mapProduct, loadCatalog, loadProduct, loadCatalogPage } = await import(
   dataUrl(
     compile("catalog-api").replace('"./api-config"', JSON.stringify(config)),
   )
@@ -98,6 +98,30 @@ test("catalog fetch traverses pagination, distinguishes empty results/errors and
     await assert.rejects(loadProduct("lime-set"), /temporarily unavailable/);
     globalThis.fetch = async () => new Response(null, { status: 404 });
     assert.equal(await loadProduct("missing"), null);
+    globalThis.fetch = async (url) => {
+      const params = new URL(url).searchParams;
+      assert.equal(params.get("category"), "clothing");
+      assert.equal(params.get("sizes"), "8,10");
+      assert.equal(params.get("priceRange"), "100-200");
+      assert.equal(params.get("sort"), "price-desc");
+      assert.equal(params.get("page"), "2");
+      return Response.json({
+        data: [product],
+        meta: { page: 2, total: 13, totalPages: 2 },
+      });
+    };
+    assert.equal(
+      (
+        await loadCatalogPage({
+          category: "clothing",
+          sizes: [8, 10],
+          priceRange: "100-200",
+          sort: "price-desc",
+          page: 2,
+        })
+      ).meta.total,
+      13,
+    );
     globalThis.fetch = async () => Response.json(product);
     assert.equal((await loadProduct("lime-set")).id, "p");
   } finally {
