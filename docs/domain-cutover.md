@@ -8,7 +8,7 @@
 | `www.wearablesbyashabi.store` | `wearables-atelier-storefront` | 308 permanent redirect to `wearablesbyashabi.store` |
 | `admin.wearablesbyashabi.store` | `wearables-atelier-admin` | Production |
 
-Workspace: `hello-76386237s-projects`. Vercel reports pending nameserver propagation at setup time. An assigned hostname is not yet proof that DNS and HTTPS are ready.
+Workspace: `hello-76386237s-projects`. Nameservers are `ns1.vercel-dns.com` and `ns2.vercel-dns.com`. DNS propagated during setup. Verified with normal certificate validation on 17 October 2026: HTTPS `/` on the storefront returns 200, HTTPS `/login` on the new admin domain returns 200, and `https://www.wearablesbyashabi.store/shop?category=clothing` returns 308 to the same path and query on the root domain. These checks verify hosting and HTTPS, not successful catalog fetches or authenticated admin workflows.
 
 The admin project's Production and Preview setting is `NEXT_PUBLIC_STOREFRONT_URL=https://wearablesbyashabi.store`. Local development still uses `http://localhost:3100` from `.env.example`.
 
