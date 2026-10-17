@@ -6,7 +6,7 @@ Customer shopping site for Wearables by Ashabi: clothing, jewellery, product det
 
 Source: [wearables-atelier-storefront](https://github.com/Trust-Code-System/wearables-atelier-storefront). Admin source: [wearables-atelier-admin](https://github.com/Trust-Code-System/wearables-atelier-admin).
 
-Live storefront: [wearables-atelier-storefront.vercel.app](https://wearables-atelier-storefront.vercel.app).
+Storefront domain: [wearablesbyashabi.store](https://wearablesbyashabi.store). Connected to Production on 17 October 2026; DNS propagation and the backend domain cutover must finish before full operation. `www` permanently redirects to the root domain. See [domain cutover](docs/domain-cutover.md). The [previous storefront address](https://storefront.wearables.trustcodesystem.tech) remains assigned during the transition.
 
 ## Getting Started
 
