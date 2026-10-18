@@ -6,7 +6,7 @@ Customer shopping site for Wearables by Ashabi: clothing, jewellery, product det
 
 Source: [wearables-atelier-storefront](https://github.com/Trust-Code-System/wearables-atelier-storefront). Admin source: [wearables-atelier-admin](https://github.com/Trust-Code-System/wearables-atelier-admin).
 
-Live storefront: [wearables-atelier-storefront.vercel.app](https://wearables-atelier-storefront.vercel.app).
+Storefront domain: [wearablesbyashabi.store](https://wearablesbyashabi.store). Connected to Production with HTTPS verified on 17 October 2026. `www` permanently redirects to the root domain. Backend CORS and the API/cookie domain cutover still require the Railway owner before full operation; see [domain cutover](docs/domain-cutover.md). The [previous storefront address](https://storefront.wearables.trustcodesystem.tech) remains assigned during the transition.
 
 ## Getting Started
 
