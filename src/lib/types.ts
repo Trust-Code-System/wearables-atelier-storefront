@@ -31,6 +31,10 @@ export interface ProductVariant {
 }
 
 export interface CartItem {
+  variantId?: string;
+  product?: Product;
+  issue?: "unavailable" | "insufficient_stock" | null;
+  lineTotalNGN?: number | null;
   productId: string;
   /** null for one-size items */
   size: number | null;

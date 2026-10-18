@@ -25,7 +25,7 @@ import { canAddStock, remainingStock, variantStock, variantPrice, stockCount, st
 
 export function ProductClient({ slug }: { slug: string }) {
   const { products, getProduct, loading, error } = useCatalog();
-  const { items, addItem, setOpen } = useCart();
+  const { items, addItem, setOpen, busy, loading: cartLoading } = useCart();
 
   const product = getProduct(slug);
   const [imageIndex, setImageIndex] = useState(0);
@@ -60,9 +60,9 @@ export function ProductClient({ slug }: { slug: string }) {
   const soldOut = stockCount(product) === 0;
   const selectedVariant = product.variants?.find((variant) => variant.size === size);
   const remainingForBag = remainingStock(items, product, size);
-  const canAdd = !oneSize && size === null ? !soldOut : canAddStock(items, product, qty, size);
+  const canAdd = !busy && !cartLoading && (!oneSize && size === null ? !soldOut : canAddStock(items, product, qty, size));
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!canAdd) return;
     if (!oneSize && size === null) {
       setSizeError(true);
@@ -71,7 +71,7 @@ export function ProductClient({ slug }: { slug: string }) {
       });
       return;
     }
-    addItem(product.id, oneSize ? null : size, qty);
+    if (!await addItem(product.id, oneSize ? null : size, qty)) return;
     setAdded(true);
     setOpen(true);
     window.setTimeout(() => setAdded(false), 1600);

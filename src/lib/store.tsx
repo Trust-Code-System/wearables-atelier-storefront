@@ -6,13 +6,15 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import type { CartItem, Currency, Order, Product } from "@/lib/types";
 import { usePathname } from "next/navigation";
 import { loadCatalog } from "@/lib/catalog-api";
-import { addStockItem, setStockQuantity } from "@/lib/stock";
+import { cartItems, cartNaira, cartRequest, CartQueue, type SavedCart } from "@/lib/cart-api";
+import { toast } from "sonner";
 
 /* ------------------------------------------------------------------ */
 /*  Public storefront settings                                       */
@@ -237,54 +239,87 @@ const CartContext = createContext<{
   items: CartItem[];
   isOpen: boolean;
   setOpen: (open: boolean) => void;
-  addItem: (productId: string, size: number | null, qty?: number) => void;
-  removeItem: (productId: string, size: number | null) => void;
-  setQty: (productId: string, size: number | null, qty: number) => void;
-  clear: () => void;
+  addItem: (productId: string, size: number | null, qty?: number) => Promise<boolean>;
+  removeItem: (productId: string, size: number | null) => Promise<boolean>;
+  setQty: (productId: string, size: number | null, qty: number) => Promise<boolean>;
+  clear: () => Promise<boolean>;
+  refresh: () => Promise<boolean>;
+  loading: boolean;
+  busy: boolean;
+  error: string;
+  subtotal: number;
+  hasIssues: boolean;
   count: number;
 } | null>(null);
 
-const sameLine = (a: CartItem, productId: string, size: number | null) =>
-  a.productId === productId && a.size === size;
-
 export function CartProvider({ children }: { children: ReactNode }) {
   const { products } = useCatalog();
-  const [items, setItems] = usePersistentState<CartItem[]>("wa:cart", []);
+  const [cart, setCart] = useState<SavedCart | null>(null);
   const [isOpen, setOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [pending, setPending] = useState(0);
+  const [error, setError] = useState("");
+  const queue = useRef(new CartQueue());
+  const items = useMemo(() => cartItems(cart, products), [cart, products]);
 
-  const addItem = useCallback(
-    (productId: string, size: number | null, qty = 1) => {
-      setItems((prev) => addStockItem(prev, products.find((product) => product.id === productId), size, qty));
-    },
-    [setItems, products],
-  );
-
-  const removeItem = useCallback(
-    (productId: string, size: number | null) =>
-      setItems((prev) => prev.filter((i) => !sameLine(i, productId, size))),
-    [setItems],
-  );
-
-  const setQty = useCallback(
-    (productId: string, size: number | null, qty: number) => {
-      if (qty <= 0) {
-        removeItem(productId, size);
-        return;
+  const run = useCallback((work: () => Promise<SavedCart>, notify = true): Promise<boolean> => {
+    return queue.current.run(async () => {
+      setPending((count) => count + 1);
+      try {
+        const saved = await work();
+        setCart(saved);
+        setError("");
+        return true;
+      } catch (cause) {
+        const message = cause instanceof Error ? cause.message : "Unable to load your bag. Please try again.";
+        setError(message);
+        if (notify) toast.error(message);
+        // A response may have been lost after a committed mutation. Reconcile,
+        // but never retry an additive action automatically.
+        try { setCart(await cartRequest()); } catch { /* Keep error and last confirmed snapshot. */ }
+        return false;
+      } finally {
+        setLoading(false);
+        setPending((count) => count - 1);
       }
-      setItems((prev) => setStockQuantity(prev, products.find((product) => product.id === productId), productId, size, qty));
-    },
-    [setItems, removeItem, products],
-  );
+    });
+  }, []);
+  const refresh = useCallback(() => run(() => cartRequest(), false), [run]);
+  useEffect(() => {
+    void refresh();
+    const onFocus = () => { void refresh(); };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [refresh]);
 
-  const clear = useCallback(() => setItems([]), [setItems]);
+  const addItem = useCallback((productId: string, size: number | null, qty = 1) => run(async () => {
+    const variant = products.find((product) => product.id === productId)?.variants?.find((value) => value.size === size);
+    if (!variant || !Number.isInteger(qty) || qty < 1) throw new Error("Choose an available size and quantity.");
+    let current = await cartRequest();
+    if (!current.id) current = await cartRequest("POST");
+    const quantity = (current.data.find((line) => line.variantId === variant.id)?.quantity ?? 0) + qty;
+    if (quantity > current.meta.quantityLimit) throw new Error("The maximum quantity per size is 99.");
+    return cartRequest("PUT", `/items/${encodeURIComponent(variant.id)}`, quantity);
+  }), [products, run]);
 
-  const count = useMemo(() => items.reduce((n, i) => n + i.qty, 0), [items]);
-
-  const value = useMemo(
-    () => ({ items, isOpen, setOpen, addItem, removeItem, setQty, clear, count }),
-    [items, isOpen, addItem, removeItem, setQty, clear, count],
-  );
-
+  const change = useCallback((productId: string, size: number | null, quantity: number) => {
+    const item = items.find((line) => line.productId === productId && line.size === size);
+    return run(async () => {
+      if (!item?.variantId || !Number.isInteger(quantity)) throw new Error("Refresh your bag and try again.");
+      return quantity <= 0
+        ? cartRequest("DELETE", `/items/${encodeURIComponent(item.variantId)}`)
+        : cartRequest("PUT", `/items/${encodeURIComponent(item.variantId)}`, quantity);
+    });
+  }, [items, run]);
+  const removeItem = useCallback((id: string, size: number | null) => change(id, size, 0), [change]);
+  const clear = useCallback(() => run(() => cartRequest("DELETE")), [run]);
+  const count = cart?.meta.itemCount ?? 0;
+  const subtotal = cart ? cartNaira(cart.subtotalKobo) : 0;
+  const hasIssues = cart?.hasIssues ?? false;
+  const busy = pending > 0;
+  const value = useMemo(() => ({ items, isOpen, setOpen, addItem, removeItem, setQty: change, clear, refresh,
+    loading, busy, error, subtotal, hasIssues, count }),
+    [items, isOpen, addItem, removeItem, change, clear, refresh, loading, busy, error, subtotal, hasIssues, count]);
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
