@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowLeftIcon,
@@ -12,8 +13,8 @@ import {
   LockIcon,
   ShoppingBagIcon,
 } from "lucide-react";
-import { useCart, useCatalog, useCurrency, useOrders, useSettings } from "@/lib/store";
-import { formatPrice, generateReference } from "@/lib/format";
+import { useCart, useCurrency, useSettings } from "@/lib/store";
+import { formatPrice } from "@/lib/format";
 import { EASE_OUT } from "@/components/motion";
 import { SlideCommit } from "@/components/micro/slide-commit";
 import { SpringCheck } from "@/components/micro/spring-check";
@@ -23,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { variantPrice, cartHasStockIssues } from "@/lib/stock";
+import { variantPrice } from "@/lib/stock";
 
 type Step = 0 | 1 | 2;
 const STEPS = ["Information", "Delivery", "Payment"] as const;
@@ -63,17 +64,15 @@ function Field({
 }
 
 export default function CheckoutPage() {
-  const { items, clear, setOpen } = useCart();
-  const { products } = useCatalog();
+  const { items, setOpen, subtotal, hasIssues, loading, busy, error } = useCart();
   const { currency } = useCurrency();
-  const { addOrder } = useOrders();
   const { settings } = useSettings();
   const deliveryOptions = DELIVERY_OPTIONS.map((option) => ({ ...option, feeNGN: option.id === "standard" ? settings.standardFeeNGN : settings.expressFeeNGN }));
 
   const [step, setStep] = useState<Step>(0);
   const [direction, setDirection] = useState(1);
-  const [payState, setPayState] = useState<"idle" | "processing" | "done">("idle");
-  const [reference, setReference] = useState<string | null>(null);
+  const [payState] = useState<"idle" | "processing" | "done">("idle");
+  const [reference] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -90,19 +89,18 @@ export default function CheckoutPage() {
   const lines = useMemo(
     () =>
       items.flatMap((item) => {
-        const product = products.find((p) => p.id === item.productId);
+        const product = item.product;
         return product ? [{ ...item, product }] : [];
       }),
-    [items, products],
+    [items],
   );
 
-  const subtotal = lines.reduce((sum, l) => sum + variantPrice(l.product, l.size) * l.qty, 0);
   const freeShipping = subtotal >= settings.freeShippingThresholdNGN;
   const deliveryFee = freeShipping
     ? 0
     : (deliveryOptions.find((d) => d.id === delivery) ?? deliveryOptions[0]).feeNGN;
   const total = subtotal + deliveryFee;
-  const stockIssues = cartHasStockIssues(items, products);
+  const stockIssues = hasIssues;
 
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -128,35 +126,15 @@ export default function CheckoutPage() {
   };
 
   const handlePay = () => {
-    if (stockIssues || items.length === 0) return;
-    setPayState("processing");
-    // NOTE for backend: replace this simulated delay with Paystack Inline
-    // (PaystackPop.setup) or a Paystack Standard redirect, then verify
-    // server-side before creating the order.
-    window.setTimeout(() => {
-      const ref = generateReference();
-      addOrder({
-        id: `o-${Date.now()}`,
-        reference: ref,
-        customer: { name: form.name, email: form.email, phone: form.phone },
-        address: { line1: form.line1, city: form.city, state: form.state },
-        delivery,
-        items: lines.map((l) => ({
-          productId: l.productId,
-          name: l.product.name,
-          size: l.size,
-          qty: l.qty,
-          priceNGN: variantPrice(l.product, l.size),
-        })),
-        totalNGN: total,
-        status: "paid",
-        createdAt: new Date().toISOString(),
-      });
-      setPayState("done");
-      setReference(ref);
-      clear();
-    }, 2200);
+    toast.info("Checkout is not available yet. Your bag has been saved.");
   };
+
+  if (loading || busy || error) {
+    return <div className="mx-auto max-w-xl px-6 py-24 text-center" role="status">
+      <p>{error || "Loading your saved bag…"}</p>
+      <Button onClick={() => setOpen(true)}>Review your bag</Button>
+    </div>;
+  }
 
   if (stockIssues && !reference) {
     return <div className="mx-auto flex max-w-xl flex-col items-center gap-4 px-6 py-24 text-center"><p className="eyebrow">Availability update</p><h1 className="font-display text-3xl">Let&apos;s update your bag.</h1><p className="text-muted-foreground">Some pieces are unavailable or your quantities exceed the available stock. Adjust your bag before continuing.</p><Button onClick={() => setOpen(true)}>Review your bag</Button><Link href="/shop" className="link-underline">Continue shopping</Link></div>;
@@ -458,7 +436,7 @@ export default function CheckoutPage() {
             {lines.map((line) => (
               <div key={`${line.productId}-${line.size ?? "os"}`} className="flex items-center gap-3">
                 <div className="relative aspect-[4/5] w-12 shrink-0 overflow-hidden rounded-md bg-muted">
-                  <Image src={line.product.images[0]} unoptimized alt={line.product.name} fill sizes="48px" className="object-cover" />
+                  {line.product.images[0] && <Image src={line.product.images[0]} unoptimized alt={line.product.name} fill sizes="48px" className="object-cover" />}
                   <span className="absolute top-0.5 right-0.5 grid size-4 place-items-center rounded-full bg-espresso text-[0.5625rem] font-semibold text-espresso-foreground tabular-nums">
                     {line.qty}
                   </span>

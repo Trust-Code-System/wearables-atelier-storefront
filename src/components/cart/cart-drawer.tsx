@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { MinusIcon, PlusIcon, ShoppingBagIcon, Trash2Icon } from "lucide-react";
-import { useCart, useCatalog, useCurrency, useSettings } from "@/lib/store";
+import { useCart, useCurrency, useSettings } from "@/lib/store";
 import { formatPrice } from "@/lib/format";
 import {
   Sheet,
@@ -17,24 +17,22 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { EASE_OUT } from "@/components/motion";
 import { SwipeRow } from "@/components/micro/swipe-row";
-import { canAddStock, cartHasStockIssues, variantStock, variantPrice, stockLabel } from "@/lib/stock";
+import { canAddStock, variantStock, variantPrice, stockLabel } from "@/lib/stock";
 
 export function CartDrawer() {
-  const { items, isOpen, setOpen, setQty, removeItem, count } = useCart();
-  const { products } = useCatalog();
+  const { items, isOpen, setOpen, setQty, removeItem, count, subtotal, hasIssues, busy, loading, error, refresh } = useCart();
   const { currency } = useCurrency();
   const { settings } = useSettings();
   const freeShippingThreshold = settings.freeShippingThresholdNGN;
 
   const lines = items.flatMap((item) => {
-    const product = products.find((p) => p.id === item.productId);
+    const product = item.product;
     return product ? [{ ...item, product }] : [];
   });
 
-  const subtotal = lines.reduce((sum, l) => sum + variantPrice(l.product, l.size) * l.qty, 0);
   const toFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
   const progress = freeShippingThreshold > 0 ? Math.min(1, subtotal / freeShippingThreshold) : 1;
-  const stockIssues = cartHasStockIssues(items, products);
+  const stockIssues = hasIssues;
 
   return (
     <Sheet open={isOpen} onOpenChange={setOpen}>
@@ -54,7 +52,11 @@ export function CartDrawer() {
           </SheetTitle>
         </SheetHeader>
 
-        {items.length === 0 ? (
+        {(loading || error) && <div className="border-b px-5 py-3 text-sm" role={error ? "alert" : "status"}>
+          {loading ? "Loading your bag…" : error}
+          {error && <button type="button" className="ml-2 underline" disabled={busy} onClick={() => { void refresh(); }}>Retry</button>}
+        </div>}
+        {!loading && !error && items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
             <div className="grid size-14 place-items-center rounded-full bg-muted">
               <ShoppingBagIcon className="size-6 text-muted-foreground" />
@@ -100,7 +102,7 @@ export function CartDrawer() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-5">
-              {items.filter((item) => !products.some((product) => product.id === item.productId)).map((item) => <div key={`${item.productId}-${item.size}`} className="border-b py-4 text-sm"><p>This piece is no longer in the collection.</p><button type="button" className="underline" onClick={() => removeItem(item.productId, item.size)}>Remove unavailable piece</button></div>)}
+              {items.filter((item) => !item.product).map((item) => <div key={`${item.productId}-${item.size}`} className="border-b py-4 text-sm"><p>This piece is no longer in the collection.</p><button type="button" className="underline" disabled={busy} onClick={() => removeItem(item.productId, item.size)}>Remove unavailable piece</button></div>)}
               <AnimatePresence initial={false}>
                 {lines.map((line) => (
                   <motion.div
@@ -119,14 +121,14 @@ export function CartDrawer() {
                       onClick={() => setOpen(false)}
                       className="relative aspect-[4/5] w-20 shrink-0 overflow-hidden rounded-md bg-muted"
                     >
-                      <Image
+                      {line.product.images[0] && <Image
                         src={line.product.images[0]}
                         unoptimized
                         alt={line.product.name}
                         fill
                         sizes="80px"
                         className="object-cover"
-                      />
+                      />}
                     </Link>
 
                     <div className="flex min-w-0 flex-1 flex-col">
@@ -147,6 +149,7 @@ export function CartDrawer() {
                         </div>
                         <button
                           type="button"
+                          disabled={busy}
                           aria-label={`Remove ${line.product.name}`}
                           onClick={() => removeItem(line.productId, line.size)}
                           className="text-muted-foreground transition-all duration-150 ease-out hover:text-destructive active:scale-90"
@@ -159,6 +162,7 @@ export function CartDrawer() {
                         <div className="inline-flex items-center rounded-md border">
                           <button
                             type="button"
+                            disabled={busy}
                             aria-label="Decrease quantity"
                             onClick={() => setQty(line.productId, line.size, line.qty - 1)}
                             className="grid size-7 place-items-center transition-all duration-150 ease-out hover:bg-muted active:scale-90"
@@ -171,7 +175,7 @@ export function CartDrawer() {
                           <button
                             type="button"
                             aria-label="Increase quantity"
-                            disabled={!canAddStock(items, line.product, 1, line.size)}
+                            disabled={busy || !canAddStock(items, line.product, 1, line.size)}
                             onClick={() => setQty(line.productId, line.size, line.qty + 1)}
                             className="grid size-7 place-items-center transition-all duration-150 ease-out hover:bg-muted active:scale-90"
                           >
@@ -179,7 +183,7 @@ export function CartDrawer() {
                           </button>
                         </div>
                         <p className="text-sm font-medium tabular-nums">
-                          {formatPrice(variantPrice(line.product, line.size) * line.qty, currency)}
+                          {formatPrice(line.lineTotalNGN ?? variantPrice(line.product, line.size) * line.qty, currency)}
                         </p>
                       </div>
                     </div>
@@ -200,7 +204,7 @@ export function CartDrawer() {
               <p className="text-[0.75rem] text-muted-foreground">
                 Delivery calculated at checkout. Taxes included.
               </p>
-              {stockIssues ? <><p role="status" className="text-sm text-muted-foreground">Remove unavailable pieces or adjust quantities before checkout.</p><Button size="lg" disabled className="w-full">Update your bag to continue</Button></> : <Button
+              {stockIssues || loading || busy || error ? <><p role="status" className="text-sm text-muted-foreground">{error ? "Refresh your bag before continuing." : loading || busy ? "Updating your bag…" : "Remove unavailable pieces or adjust quantities before checkout."}</p><Button size="lg" disabled className="w-full">Update your bag to continue</Button></> : <Button
                 size="lg"
                 className="w-full transition-transform duration-150 ease-out active:scale-[0.98]"
                 onClick={() => setOpen(false)}
