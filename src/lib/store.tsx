@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import type { CartItem, Currency, Order, Product } from "@/lib/types";
@@ -15,6 +16,8 @@ import { usePathname } from "next/navigation";
 import { loadCatalog } from "@/lib/catalog-api";
 import { cartItems, cartNaira, cartRequest, CartQueue, type SavedCart } from "@/lib/cart-api";
 import { toast } from "sonner";
+import { WishlistSync, initialWishlist, type WishlistState } from "./wishlist-sync";
+import { accountSession } from "./account-api";
 
 /* ------------------------------------------------------------------ */
 /*  Public storefront settings                                       */
@@ -211,21 +214,34 @@ export function useCatalog() {
 /*  Cart                                                               */
 /* ------------------------------------------------------------------ */
 
-function validWishlist(value: string[]): string[] {
-  return Array.isArray(value) ? [...new Set(value.filter((id) => typeof id === "string"))] : [];
-}
-
-const WishlistContext = createContext<{
-  ids: string[];
-  toggle: (id: string) => void;
-} | null>(null);
+const WishlistContext = createContext<(WishlistState & {
+  toggle: (id: string) => Promise<boolean>;
+  refresh: () => Promise<boolean>;
+}) | null>(null);
+const serverWishlist = () => initialWishlist;
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
-  const [ids, setIds] = usePersistentState<string[]>("wa:wishlist", [], validWishlist);
-  const toggle = useCallback((id: string) => {
-    setIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
-  }, [setIds]);
-  const value = useMemo(() => ({ ids, toggle }), [ids, toggle]);
+  const [sync] = useState(() => new WishlistSync());
+  const state = useSyncExternalStore(sync.subscribe, sync.getSnapshot, serverWishlist);
+  useEffect(() => {
+    void sync.refresh();
+    const refresh = () => { if (document.visibilityState !== "hidden") void sync.refresh(); };
+    const changed = () => { void sync.accountChanged(); };
+    const storage = (event: StorageEvent) => { if (event.key === "wa:wishlist") refresh(); };
+    const interval = window.setInterval(refresh, 30000);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    window.addEventListener("wearables:account-changed", changed);
+    window.addEventListener("storage", storage);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+      window.removeEventListener("wearables:account-changed", changed);
+      window.removeEventListener("storage", storage);
+    };
+  }, [sync]);
+  const value = useMemo(() => ({ ...state, toggle: sync.toggle, refresh: sync.refresh }), [state, sync]);
   return <WishlistContext.Provider value={value}>{children}</WishlistContext.Provider>;
 }
 
@@ -288,9 +304,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void refresh();
     const onFocus = () => { void refresh(); };
+    const onAccountChange = () => {
+      setCart(null);
+      void run(async () => {
+        const session = await accountSession();
+        return session ? cartRequest("POST", "/merge") : cartRequest();
+      }, false);
+    };
     window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, [refresh]);
+    window.addEventListener("wearables:account-changed", onAccountChange);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("wearables:account-changed", onAccountChange);
+    };
+  }, [refresh, run]);
 
   const addItem = useCallback((productId: string, size: number | null, qty = 1) => run(async () => {
     const variant = products.find((product) => product.id === productId)?.variants?.find((value) => value.size === size);
