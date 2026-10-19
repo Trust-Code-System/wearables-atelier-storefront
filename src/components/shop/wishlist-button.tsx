@@ -16,15 +16,15 @@ const BURST_ANGLES = [-90, -30, 30, 90, 150, 210];
  * easing curves and stays under 300ms; reduced motion skips it entirely.
  */
 export function WishlistButton({ id, name, showLabel = false }: { id: string; name: string; showLabel?: boolean }) {
-  const { ids, toggle } = useWishlist();
+  const { ids, toggle, loading, busy, mode } = useWishlist();
   const saved = ids.includes(id);
   const reduce = useReducedMotion();
   const [pulse, setPulse] = useState(0);
   const [burst, setBurst] = useState(0);
 
-  const handleToggle = () => {
+  const handleToggle = async () => {
+    if (!await toggle(id)) { toast.error("Unable to save your wishlist. Open your wishlist to retry."); return; }
     if (!saved) setBurst((b) => b + 1);
-    toggle(id);
     setPulse((p) => p + 1);
     toast(saved ? "Removed from your wishlist" : "Saved to your wishlist");
   };
@@ -34,6 +34,7 @@ export function WishlistButton({ id, name, showLabel = false }: { id: string; na
       type="button"
       className={showLabel ? "wishlist-detail-button" : "product-wishlist-button"}
       aria-label={`${saved ? "Remove" : "Save"} ${name} ${saved ? "from" : "to"} wishlist`}
+      disabled={loading || busy || mode === "unknown"}
       aria-pressed={saved}
       onClick={handleToggle}
     >
