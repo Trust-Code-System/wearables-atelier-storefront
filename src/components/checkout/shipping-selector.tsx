@@ -2,6 +2,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { storeRequest, type CheckoutSelection } from "@/lib/checkout-api";
 import { cartNaira } from "@/lib/cart-api";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { brandContact } from "@/lib/brand-contact";
 
 type Place = { id: string; name: string; lgaId?: string | null };
@@ -191,77 +199,52 @@ export function ShippingSelector({
       </fieldset>
       {mode === "delivery" && (
         <>
-          <label className={selectClass}>
-            State
-            <select
-              className={inputClass}
-              value={stateId}
-              onChange={(event) => {
-                setStateId(event.target.value);
-                setLgaId("");
+          <ShippingSelect
+            id="shipping-state"
+            label="State"
+            placeholder="Choose a state"
+            value={stateId}
+            options={states}
+            onChange={(value) => {
+              setStateId(value);
+              setLgaId("");
+              setDestinationId("");
+              setMethodId("");
+              onChange(null);
+            }}
+          />
+          {stateId && (
+            <ShippingSelect
+              id="shipping-lga"
+              label="LGA (optional for named local areas)"
+              placeholder="Select an LGA if applicable"
+              value={lgaId}
+              options={lgas}
+              onChange={(value) => {
+                setLgaId(value);
                 setDestinationId("");
                 setMethodId("");
                 onChange(null);
               }}
-            >
-              <option value="">Choose a state</option>
-              {states.map((value) => (
-                <option key={value.id} value={value.id}>
-                  {value.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          {stateId && (
-            <label className={selectClass}>
-              LGA (optional for named local areas)
-              <select
-                className={inputClass}
-                value={lgaId}
-                onChange={(event) => {
-                  setLgaId(event.target.value);
-                  setDestinationId("");
-                  setMethodId("");
-                  onChange(null);
-                }}
-              >
-                <option value="">Select an LGA if applicable</option>
-                {lgas.map((value) => (
-                  <option key={value.id} value={value.id}>
-                    {value.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            />
           )}
           {stateId && (
-            <label className={selectClass}>
-              Delivery area
-              <select
-                className={inputClass}
-                value={destinationId}
-                onChange={(event) => {
-                  const next = destinations.find(
-                    (value) => value.id === event.target.value,
-                  );
-                  setDestinationId(event.target.value);
-                  if (next?.lgaId) setLgaId(next.lgaId);
-                  setMethodId("");
-                  onChange(null);
-                }}
-              >
-                <option value="">Choose your exact area</option>
-                {destinations
-                  .filter(
-                    (value) => !lgaId || !value.lgaId || value.lgaId === lgaId,
-                  )
-                  .map((value) => (
-                    <option key={value.id} value={value.id}>
-                      {value.name}
-                    </option>
-                  ))}
-              </select>
-            </label>
+            <ShippingSelect
+              id="shipping-destination"
+              label="Delivery area"
+              placeholder="Choose your exact area"
+              value={destinationId}
+              options={destinations.filter(
+                (value) => !lgaId || !value.lgaId || value.lgaId === lgaId,
+              )}
+              onChange={(value) => {
+                const next = destinations.find((item) => item.id === value);
+                setDestinationId(value);
+                if (next?.lgaId) setLgaId(next.lgaId);
+                setMethodId("");
+                onChange(null);
+              }}
+            />
           )}
           <label className={selectClass}>
             Street address
@@ -344,6 +327,52 @@ export function ShippingSelector({
       >
         Refresh delivery options
       </button>
+    </div>
+  );
+}
+
+function ShippingSelect({
+  id,
+  label,
+  placeholder,
+  value,
+  options,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  placeholder: string;
+  value: string;
+  options: Place[];
+  onChange: (value: string) => void;
+}) {
+  const items = [
+    { value: "", label: placeholder },
+    ...options.map((option) => ({ value: option.id, label: option.name })),
+  ];
+  return (
+    <div className="grid gap-2 text-sm">
+      <Label htmlFor={id}>{label}</Label>
+      <Select
+        items={items}
+        value={value}
+        onValueChange={(next) => onChange(next ?? "")}
+      >
+        <SelectTrigger id={id} className="h-11 min-h-11 w-full text-base">
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent
+          alignItemWithTrigger={false}
+          className="store-select-popup"
+          align="start"
+        >
+          {items.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

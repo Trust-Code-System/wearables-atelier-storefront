@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { AccountForm } from "@/components/account/account-form";
+import { AccountDashboard } from "@/components/account/account-dashboard";
 
-export const metadata: Metadata = { title: "Your account" };
+export const metadata: Metadata = { title: "Your account", robots: { index: false, follow: false } };
 
 export default function AccountPage() {
-  return <AccountForm mode="login" />;
+  return <AccountDashboard />;
 }

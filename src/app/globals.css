@@ -216,12 +216,17 @@
     height: 10px;
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--border);
+    background: color-mix(in srgb, var(--primary) 48%, var(--background));
     border-radius: 8px;
     border: 2px solid var(--background);
   }
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--secondary);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+  ::-webkit-scrollbar-corner { background: var(--background); }
+  @supports not selector(::-webkit-scrollbar) {
+    * { scrollbar-width: thin; scrollbar-color: var(--bronze) var(--secondary); }
   }
 }
 

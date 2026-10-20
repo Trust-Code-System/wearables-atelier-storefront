@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { MinusIcon, PlusIcon, ShoppingBagIcon, Trash2Icon } from "lucide-react";
-import { useCart, useCurrency, useSettings } from "@/lib/store";
+import { useCart, useCurrency } from "@/lib/store";
 import { formatPrice } from "@/lib/format";
 import {
   Sheet,
@@ -22,16 +22,12 @@ import { canAddStock, variantStock, variantPrice, stockLabel } from "@/lib/stock
 export function CartDrawer() {
   const { items, isOpen, setOpen, setQty, removeItem, count, subtotal, hasIssues, busy, loading, error, refresh } = useCart();
   const { currency } = useCurrency();
-  const { settings } = useSettings();
-  const freeShippingThreshold = settings.freeShippingThresholdNGN;
 
   const lines = items.flatMap((item) => {
     const product = item.product;
     return product ? [{ ...item, product }] : [];
   });
 
-  const toFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
-  const progress = freeShippingThreshold > 0 ? Math.min(1, subtotal / freeShippingThreshold) : 1;
   const stockIssues = hasIssues;
 
   return (
@@ -75,31 +71,16 @@ export function CartDrawer() {
               Browse the collection
             </Button>
           </div>
+        ) : loading || error ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center" role="status">
+            <ShoppingBagIcon className="size-8 text-muted-foreground" aria-hidden />
+            <h2 className="font-display text-lg">{loading ? "Checking your pieces…" : "Your bag is safely saved."}</h2>
+            <p className="text-sm text-muted-foreground">{loading ? "We’re confirming current prices and availability." : "We couldn’t check prices and availability. Try again to continue."}</p>
+            {error && <Button variant="outline" disabled={loading} onClick={refresh}>{loading ? "Retrying…" : "Try again"}</Button>}
+          </div>
         ) : (
           <>
-            {/* Free shipping progress */}
-            <div className="border-b px-5 py-3">
-              <p className="mb-2 text-[0.75rem] text-muted-foreground">
-                {toFreeShipping > 0 ? (
-                  <>
-                    <span className="font-medium text-foreground tabular-nums">
-                      {formatPrice(toFreeShipping, currency)}
-                    </span>{" "}
-                    away from complimentary delivery
-                  </>
-                ) : (
-                  "You've unlocked complimentary delivery"
-                )}
-              </p>
-              <div className="h-1 overflow-hidden rounded-full bg-muted">
-                <motion.div
-                  className="h-full rounded-full bg-bronze"
-                  initial={false}
-                  animate={{ width: `${progress * 100}%` }}
-                  transition={{ duration: 0.6, ease: [...EASE_OUT] }}
-                />
-              </div>
-            </div>
+            <p className="border-b px-5 py-3 text-xs text-muted-foreground">Delivery options and charges are confirmed at checkout.</p>
 
             <div className="flex-1 overflow-y-auto px-5">
               {items.filter((item) => !item.product).map((item) => <div key={`${item.productId}-${item.size}`} className="border-b py-4 text-sm"><p>This piece is no longer in the collection.</p><button type="button" className="underline" disabled={busy} onClick={() => removeItem(item.productId, item.size)}>Remove unavailable piece</button></div>)}

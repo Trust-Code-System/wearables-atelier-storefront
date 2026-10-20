@@ -1,8 +1,8 @@
 # Customer entry and public contact destinations
 
-The owner chose to prepare account pages now and add authentication with the backend next. Routes `/account`, `/account/login` and `/account/register` provide the designed forms, validation, password visibility and navigation. Submit shows an honest unavailable message and clears the fields; no authentication endpoint, password persistence, customer profile or fake login session exists.
+Account forms now call Better Auth with credentialed, uncached requests. Signup requires 12 characters and email verification before saved profile/address writes. `/account` renders the customer's dashboard after session lookup; `/account/login` and `/account/register` retain the designed auth experience. Recovery, reset and verification result pages remain connected. Profile phone, addresses and order history/details now use session-owned backend endpoints. See [current account integration](account-dashboard-integration-2026-10-20.md).
 
-Wishlist saves IDs under `wa:wishlist` on the current browser origin. A heart on each card and product detail toggles membership; `/wishlist` shows the saved catalog pieces, with an empty state and links back to shopping. Unavailable product IDs are retained in storage but hidden from the view. Wishlist is not synced across devices or linked to an account yet.
+Guest favourites remain in `wa:wishlist`. Signed-in favourites and carts are backend-owned; the existing guarded import/merge and account-switch isolation are preserved. See [wishlist synchronization](wishlist.md) and [cart integration](cart.md). No authentication credential or account profile/address/order record is persisted by the new dashboard in local storage.
 
 Public contact destinations were verified from the footer of https://wearables-atelier.vercel.app/ on 12 October 2026:
 
