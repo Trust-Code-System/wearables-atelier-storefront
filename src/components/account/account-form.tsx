@@ -56,6 +56,16 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
     } catch (cause) { setMessage(cause instanceof Error ? cause.message : "Unable to access your account. Please retry."); }
     finally { setBusy(false); }
   };
+  const resend = async () => {
+    const input = document.getElementById("account-email") as HTMLInputElement | null;
+    if (!input?.reportValidity()) return;
+    setBusy(true); setMessage("");
+    try {
+      await accountAction("send-verification-email", { email: input.value.trim() });
+      setMessage("If your account needs verification, a link will be sent to your inbox.");
+    } catch (cause) { setMessage(cause instanceof Error ? cause.message : "Unable to resend verification."); }
+    finally { setBusy(false); }
+  };
   const logout = async () => {
     setBusy(true); setMessage("");
     try { await accountAction("sign-out", {}); setSession(null); }
@@ -66,5 +76,6 @@ export function AccountForm({ mode }: { mode: "login" | "register" }) {
   {register && <label htmlFor="account-name">Your name<input id="account-name" name="name" autoComplete="name" maxLength={120} required /></label>}
   <label htmlFor="account-email">Email address<input id="account-email" name="email" maxLength={254} type="email" autoComplete="email" required /></label>
   <div className="account-field"><label htmlFor="account-password">Password</label><span className="account-password"><input id="account-password" name="password" type={showPassword ? "text" : "password"} autoComplete={register ? "new-password" : "current-password"} minLength={register ? 12 : 1} maxLength={128} required /><button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={18} aria-hidden /> : <Eye size={18} aria-hidden />}</button></span></div>
-  <button type="submit" className="store-button" disabled={busy || checking}>{busy ? "Please wait…" : register ? "Create account" : "Sign in"}<ArrowUpRight size={18} aria-hidden /></button><p role="status" className="account-message">{checking ? "Checking your account…" : message}</p></form>}<p className="account-switch">{register ? "Already part of the atelier?" : "New to the atelier?"} <Link href={register ? "/account/login" : "/account/register"}>{register ? "Sign in" : "Create an account"}</Link></p><div className="account-help"><Link href="/wishlist">View your wishlist</Link><a href={brandContact.whatsapp} target="_blank" rel="noopener noreferrer">Need a hand? Contact us <ArrowUpRight size={13} aria-hidden /></a></div></div></section>;
+  {!register && <Link href="/account/forgot-password" className="store-text-link">Forgot password?</Link>}
+  <button type="submit" className="store-button" disabled={busy || checking}>{busy ? "Please wait…" : register ? "Create account" : "Sign in"}<ArrowUpRight size={18} aria-hidden /></button><p role="status" className="account-message">{checking ? "Checking your account…" : message}</p><button type="button" className="store-text-link" disabled={busy || checking} onClick={() => { void resend(); }}>Resend verification email</button></form>}<p className="account-switch">{register ? "Already part of the atelier?" : "New to the atelier?"} <Link href={register ? "/account/login" : "/account/register"}>{register ? "Sign in" : "Create an account"}</Link></p><div className="account-help"><Link href="/">Back to home</Link><Link href="/wishlist">View your wishlist</Link><a href={brandContact.whatsapp} target="_blank" rel="noopener noreferrer">Need a hand? Contact us <ArrowUpRight size={13} aria-hidden /></a></div></div></section>;
 }
