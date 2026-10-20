@@ -19,7 +19,7 @@ export function accountChanged() {
   window.dispatchEvent(new Event("wearables:account-changed"));
 }
 export async function accountAction(
-  action: "sign-in/email" | "sign-up/email" | "sign-out",
+  action: "sign-in/email" | "sign-up/email" | "sign-out" | "request-password-reset" | "reset-password" | "send-verification-email",
   body: object,
 ) {
   const response = await fetch(`${getApiBaseUrl()}/api/auth/${action}`, {
@@ -34,12 +34,14 @@ export async function accountAction(
     if (response.status === 429)
       throw new Error("Please wait a moment before trying again.");
     if (action === "sign-in/email")
-      throw new Error("Unable to sign in. Check your email and password.");
+      throw new Error("Unable to sign in. Check your email and password, and verify your email first. You can resend the verification email below.");
+    if (action === "reset-password") throw new Error("This reset link may be invalid or expired. Request a new link and try again.");
+    if (action === "request-password-reset" || action === "send-verification-email") throw new Error("Unable to send the email. Please try again shortly.");
     throw new Error(
       action === "sign-out"
         ? "Unable to sign out. Please try again."
         : "Unable to create your account. Check your details or try signing in.",
     );
   }
-  accountChanged();
+  if (["sign-in/email", "sign-up/email", "sign-out", "reset-password"].includes(action)) accountChanged();
 }
