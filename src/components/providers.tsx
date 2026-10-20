@@ -19,32 +19,41 @@ import {
  */
 function SmoothScroll() {
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    const lenis = new Lenis({
-      // The body grows with route content; a viewport-height html element does not.
-      // Observe that growth so the scroll limit never stays on the previous page.
-      content: document.body,
-      duration: 1.05,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    });
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let lenis: Lenis | null = null;
     let raf = 0;
     const loop = (time: number) => {
+      if (!lenis || document.hidden) return;
       lenis.raf(time);
       raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(loop);
+    const syncPreference = () => {
+      cancelAnimationFrame(raf);
+      lenis?.destroy();
+      lenis = null;
+      if (preference.matches) return;
+      lenis = new Lenis({
+        // Observe route content growth so the limit follows the current page.
+        content: document.body,
+        duration: 1.05,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      });
+      if (!document.hidden) raf = requestAnimationFrame(loop);
+    };
+    syncPreference();
+    preference.addEventListener("change", syncPreference);
 
     const onVisibility = () => {
-      if (document.hidden) cancelAnimationFrame(raf);
-      else raf = requestAnimationFrame(loop);
+      cancelAnimationFrame(raf);
+      if (!document.hidden && lenis) raf = requestAnimationFrame(loop);
     };
     document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
       cancelAnimationFrame(raf);
       document.removeEventListener("visibilitychange", onVisibility);
-      lenis.destroy();
+      preference.removeEventListener("change", syncPreference);
+      lenis?.destroy();
     };
   }, []);
 

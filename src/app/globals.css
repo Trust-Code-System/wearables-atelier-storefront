@@ -5,7 +5,8 @@
 /* Local enter/exit animation utilities used by the UI kit
    (replaces tw-animate-css). Built on the composable `opacity`, `scale`
    and `translate` properties so they never clobber an element's own
-   `transform` — e.g. dialog centering survives the entrance animation. */
+   `transform`. Dialogs use a grid viewport for centering: Tailwind's
+   translate utilities use the same individual property as these keyframes. */
 @utility animate-in {
   animation: wa-in 160ms var(--ease-out-expo, cubic-bezier(0.23, 1, 0.32, 1));
 }
@@ -55,6 +56,13 @@
     opacity: var(--wa-out-o, 1);
     scale: var(--wa-out-s, 1);
     translate: var(--wa-out-x, 0) var(--wa-out-y, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="dialog-content"],
+  [data-slot="dialog-overlay"] {
+    animation: none;
   }
 }
 
@@ -216,12 +224,17 @@
     height: 10px;
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--border);
+    background: color-mix(in srgb, var(--primary) 48%, var(--background));
     border-radius: 8px;
     border: 2px solid var(--background);
   }
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--secondary);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+  ::-webkit-scrollbar-corner { background: var(--background); }
+  @supports not selector(::-webkit-scrollbar) {
+    * { scrollbar-width: thin; scrollbar-color: var(--bronze) var(--secondary); }
   }
 }
 

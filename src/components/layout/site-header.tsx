@@ -6,7 +6,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Menu, ShoppingBag, Search, ArrowUpRight, Truck, Heart, UserRound } from "lucide-react";
-import { useCart, useCatalog, useCurrency, useSettings } from "@/lib/store";
+import { useCart, useCatalog, useCurrency } from "@/lib/store";
 import { formatPrice } from "@/lib/format";
 import { Tip, WarmGroup } from "@/components/micro/warm-tooltip";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -68,15 +68,14 @@ function DesktopNavigation() {
 
 export function SiteHeader() {
   const { count, isOpen: bagOpen, setOpen } = useCart();
-  const { products } = useCatalog();
+  const { products, loading, error, refresh } = useCatalog();
   const { currency } = useCurrency();
-  const { settings } = useSettings();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [headerHidden, setHeaderHidden] = useState(false);
   const reduceMotion = useReducedMotion() ?? false;
-  const matching = products.filter((product) => `${product.name} ${product.category}`.toLowerCase().includes(query.toLowerCase())).slice(0, 8);
+  const matching = products.filter((product) => `${product.name} ${product.category}`.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 8);
 
   useEffect(() => {
     // Accumulate a little travel before reacting, so trackpads don't flicker the bar.
@@ -112,7 +111,7 @@ export function SiteHeader() {
 
   return (
     <header className="store-header" data-hidden={headerHidden && !menuOpen && !searchOpen && !bagOpen} onFocusCapture={() => setHeaderHidden(false)}>
-      <div className="store-announcement"><span className="store-announcement-brand"><span className="store-announcement-dot" />Culture. Luxury. Elegance.</span><span className="store-announcement-delivery"><Truck size={13} aria-hidden />Complimentary delivery over {formatPrice(settings.freeShippingThresholdNGN, "NGN")}</span></div>
+      <div className="store-announcement"><span className="store-announcement-brand"><span className="store-announcement-dot" />Culture. Luxury. Elegance.</span><span className="store-announcement-delivery"><Truck size={13} aria-hidden />Delivery options at checkout</span></div>
       <div className="store-header-row">
         <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <SheetTrigger render={<button className="store-icon-button store-mobile-menu" aria-label="Open menu" />}><Menu size={21} aria-hidden /></SheetTrigger>
@@ -146,8 +145,8 @@ export function SiteHeader() {
           <DialogHeader><DialogTitle>Find your next favourite.</DialogTitle></DialogHeader>
           <label className="sr-only" htmlFor="store-search">Search products</label>
           <input id="store-search" className="store-search-input" placeholder="Search clothing, jewelry, a favourite piece…" value={query} onChange={(event) => setQuery(event.target.value)} autoComplete="off" />
-          <p className="store-label">{query ? `${matching.length} matching ${matching.length === 1 ? "piece" : "pieces"}` : "Explore the collection"}</p>
-          <div className="store-search-results">{matching.length ? matching.map((product) => <Link key={product.id} href={`/product/${product.slug}`} onClick={() => setSearchOpen(false)}>{product.images[0] && <span className="relative size-12 shrink-0"><Image src={product.images[0]} alt="" fill sizes="48px" className="object-cover" unoptimized /></span>}<span className="flex-1">{product.name}<small>{product.category}</small></span><span>{formatPrice(product.priceNGN, currency)}</span><ArrowUpRight size={15} aria-hidden /></Link>) : <p className="py-8 text-sm text-muted-foreground">No pieces found. Try “gele”, “crystal”, or “jewelry”.</p>}</div>
+          <p className="store-label" aria-live="polite">{loading ? "Loading the collection…" : error ? "Collection unavailable" : query.trim() ? `${matching.length === 8 ? "Showing up to 8" : matching.length} matching ${matching.length === 1 ? "piece" : "pieces"}` : "Explore the collection"}</p>
+          <div className="store-search-results">{error ? <div className="catalog-inline-state" role="status"><p>We couldn’t load the collection. Please try again.</p><button type="button" className="store-text-link" disabled={loading} onClick={refresh}>{loading ? "Retrying…" : "Try again"}<ArrowUpRight size={15} aria-hidden /></button></div> : loading ? <p role="status" className="py-8 text-sm text-muted-foreground">Finding your next favourite…</p> : matching.length ? matching.map((product) => <Link key={product.id} href={`/product/${product.slug}`} onClick={() => setSearchOpen(false)}>{product.images[0] && <span className="relative size-12 shrink-0"><Image src={product.images[0]} alt="" fill sizes="48px" className="object-cover" unoptimized /></span>}<span className="flex-1">{product.name}<small>{product.category}</small></span><span>{formatPrice(product.priceNGN, currency)}</span><ArrowUpRight size={15} aria-hidden /></Link>) : <p className="py-8 text-sm text-muted-foreground">No pieces found. Try “gele”, “crystal”, or “jewelry”.</p>}</div>
         </DialogContent>
       </Dialog>
     </header>

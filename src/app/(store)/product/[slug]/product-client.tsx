@@ -57,6 +57,7 @@ export function ProductClient({ slug }: { slug: string }) {
   }
 
   const oneSize = product.sizes.length === 0;
+  const needsSize = !oneSize && size === null;
   const soldOut = stockCount(product) === 0;
   const selectedVariant = product.variants?.find((variant) => variant.size === size);
   const remainingForBag = remainingStock(items, product, size);
@@ -127,7 +128,7 @@ export function ProductClient({ slug }: { slug: string }) {
           </div>
 
           {product.images.length > 1 && (
-            <div className="flex gap-3">
+            <div className="flex gap-3 overflow-x-auto p-1">
               {product.images.map((src, i) => (
                 <button
                   key={src}
@@ -136,7 +137,7 @@ export function ProductClient({ slug }: { slug: string }) {
                   aria-label={`View image ${i + 1}`}
                   aria-pressed={imageIndex === i}
                   className={cn(
-                    "relative aspect-[4/5] w-20 overflow-hidden rounded-md bg-muted transition-all duration-200 ease-out active:scale-95",
+                    "relative aspect-[4/5] w-20 shrink-0 overflow-hidden rounded-md bg-muted transition-all duration-200 ease-out active:scale-95",
                     imageIndex === i
                       ? "ring-2 ring-ring ring-offset-2 ring-offset-background"
                       : "opacity-60 hover:opacity-100",
@@ -208,7 +209,22 @@ export function ProductClient({ slug }: { slug: string }) {
                       type="button"
                       role="radio"
                       aria-checked={selected}
+                      tabIndex={selected || (size === null && s === product.sizes.find((candidate) => variantStock(product, candidate) > 0)) ? 0 : -1}
                       disabled={variantStock(product, s) === 0}
+                      onKeyDown={(event) => {
+                        if (!["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"].includes(event.key)) return;
+                        event.preventDefault();
+                        const available = product.sizes.filter((candidate) => variantStock(product, candidate) > 0);
+                        const index = available.indexOf(s);
+                        const direction = event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1;
+                        const next = event.key === "Home" ? available[0] : event.key === "End" ? available.at(-1) : available[(index + direction + available.length) % available.length];
+                        if (next === undefined) return;
+                        setSize(next);
+                        setQtyLocal(1);
+                        setSizeError(false);
+                        const buttons = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="radio"]');
+                        buttons?.[product.sizes.indexOf(next)]?.focus();
+                      }}
                       onClick={() => {
                         setSize(s);
                         setQtyLocal(1);
@@ -242,12 +258,12 @@ export function ProductClient({ slug }: { slug: string }) {
           )}
 
           {/* Qty + Add */}
-          <div className="flex items-stretch gap-3">
-            <div className="inline-flex items-center rounded-lg border">
+          <div className="product-purchase-actions flex flex-col items-stretch gap-3 sm:flex-row">
+            <div className="inline-flex min-h-12 w-fit shrink-0 items-center rounded-lg border">
               <button
                 type="button"
                 aria-label="Decrease quantity"
-                disabled={soldOut || qty <= 1}
+                disabled={soldOut || needsSize || qty <= 1}
                 onClick={() => setQtyLocal((q) => Math.max(1, q - 1))}
                 className="grid h-full w-10 place-items-center transition-all duration-150 ease-out hover:bg-muted active:scale-90"
               >
@@ -257,7 +273,7 @@ export function ProductClient({ slug }: { slug: string }) {
               <button
                 type="button"
                 aria-label="Increase quantity"
-                disabled={soldOut || qty >= remainingForBag}
+                disabled={soldOut || needsSize || qty >= remainingForBag}
                 onClick={() => setQtyLocal((q) => Math.min(remainingForBag, q + 1))}
                 className="grid h-full w-10 place-items-center transition-all duration-150 ease-out hover:bg-muted active:scale-90"
               >
@@ -266,7 +282,7 @@ export function ProductClient({ slug }: { slug: string }) {
             </div>
 
             <motion.div
-              className="flex-1"
+              className="min-w-0 flex-1"
               animate={added ? { scale: [1, 0.97, 1] } : {}}
               transition={{ duration: 0.35, ease: "easeOut" }}
             >
@@ -274,14 +290,14 @@ export function ProductClient({ slug }: { slug: string }) {
                 size="lg"
                 disabled={!canAdd}
                 onClick={handleAdd}
-                className="h-12 w-full text-[0.9375rem] transition-all duration-150 ease-out active:scale-[0.98]"
+                className="h-auto min-h-12 w-full whitespace-normal py-3 text-center text-[0.9375rem] transition-all duration-150 ease-out active:scale-[0.98]"
               >
                 {added ? (
                   <CheckIcon data-icon="inline-start" />
                 ) : (
                   <ShoppingBagIcon data-icon="inline-start" />
                 )}
-                {soldOut ? "Currently unavailable" : remainingForBag === 0 ? "All available pieces in your bag" : added ? "Added to bag" : "Add to bag"}
+                {soldOut ? "Currently unavailable" : needsSize ? "Choose a size to add to bag" : remainingForBag === 0 ? "All available pieces in your bag" : added ? "Added to bag" : "Add to bag"}
               </Button>
             </motion.div>
           </div>

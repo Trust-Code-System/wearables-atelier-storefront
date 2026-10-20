@@ -1,6 +1,6 @@
 ## Wearables Atelier storefront
 
-Customer shopping site for Wearables by Ashabi: clothing, jewellery, product details, styled NGN/USD display, wishlist, shopping bag and demo checkout. The admin application is a separate project and repository; there are no admin pages or admin links in this app.
+Customer shopping site for Wearables by Ashabi: clothing, jewellery, product details, styled NGN/USD display, account dashboard, wishlist, shopping bag and hosted checkout integration. The admin application is a separate project and repository; there are no admin pages or admin links in this app.
 
 ![Customer storefront](docs/previews/storefront-separated.jpg)
 
@@ -40,10 +40,11 @@ Catalog reads are connected. Include the storefront origin in backend CORS. Loca
 
 ### Structure and dependencies
 
-- `src/app/(store)` — home, shop, product, wishlist, contact, account and checkout routes.
+- `src/app/(store)` — home, shop, product, wishlist, contact and checkout routes.
+- `src/app/(auth)` — signed-in account dashboard, branded sign-in/sign-up and email recovery routes.
 - `src/components/layout` — customer header and footer.
 - `src/components/cart` and `src/components/shop` — shopping interactions.
-- `src/lib/store.tsx` — live public catalog, demo settings and browser-owned cart/checkout state.
+- `src/lib/store.tsx` — live public catalog, public display settings and server-backed bag/wishlist providers.
 - `src/lib/api-config.ts` — validated public API base URL.
 - `public/brand` and `public/collection` — supplied brand logo and photography.
 
@@ -55,9 +56,13 @@ Catalog data comes from the shared backend. Published admin products appear in t
 
 Size selection uses each variant's NGN price and available quantity (on-hand minus reserved). The bag uses the selected size's price and limit. Product cards show the lowest variant price with “From” when prices differ. Signed images are rendered directly so Next's optimizer does not cache expired signatures.
 
-Cart and wishlist remain browser-owned. Checkout payment and order creation remain simulated: adding to the bag does not reserve or reduce database stock. Checkout reservations, server-side repricing and payments are separate work. The USD option still uses the existing display-only conversion rate.
+Account login/signup, recovery, verification, cart and wishlist use the shared backend with HttpOnly cookie sessions. The redesigned auth forms keep passwords in memory only and require the backend's 12-character signup minimum. `/account` is a separate signed-in dashboard with Overview, Orders, Addresses, Measurements, Avatar, Password and Email tabs. Profile phone, saved-address CRUD/default selection, paginated order history and authorized order details use backend APIs. Measurements and photo uploads remain explicitly unavailable; password management links to native email recovery, and changing an email is disabled by backend policy.
 
-Wishlist hearts on cards and product pages save product IDs in this browser. Account, login and registration pages are prepared for the next authentication phase: they clearly indicate that online accounts are not yet available. They do not transmit or store passwords, create accounts, or simulate an authenticated session. Contact buttons use the original brand's WhatsApp destination; Instagram, TikTok, YouTube and maps links were copied from its public footer.
+Cart and account wishlists are server-backed, with guest merge/retry and account-switch isolation preserved from upstream. Checkout uses authoritative shipping options, reservation/order creation and hosted Paystack initialization from upstream main. Return/access routes verify server status and never treat a redirect or slider as payment success. No card fields or invented free/express delivery promises are used in the bag/checkout flow. The USD option remains display-only; checkout operates in NGN kobo.
+
+Custom-domain API access still needs the coordinated backend/domain cutover in `docs/domain-cutover.md`. A local successful build or fixture test is not evidence of live email, provider payment or cross-domain cookie acceptance. Details and verification are in `docs/account-dashboard-integration-2026-10-20.md`.
+
+Contact buttons use the original brand's WhatsApp destination; Instagram, TikTok, YouTube and maps links were copied from its public footer.
 
 Existing browser data is not deleted. Old sample catalog entries are ignored; old cart lines whose product IDs are no longer available can be removed from the bag. Settings still expose only public values. Catalog-management actions belong to the separate admin app.
 

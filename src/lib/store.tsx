@@ -153,6 +153,7 @@ const CatalogContext = createContext<{
   products: Product[];
   loading: boolean;
   error: string;
+  refresh: () => void;
   getProduct: (slug: string) => Product | undefined;
 } | null>(null);
 
@@ -162,11 +163,13 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
+  const refreshCatalog = useCallback(() => setRetry((value) => value + 1), []);
   useEffect(() => {
     const controller = new AbortController();
     let request = 0;
     const refresh = async () => {
       const current = ++request;
+      setLoading(true);
       try {
         const loaded = await loadCatalog(controller.signal);
         if (controller.signal.aborted || current !== request) return;
@@ -195,11 +198,8 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
     (slug: string) => products.find((product) => product.slug === slug),
     [products],
   );
-  const value = useMemo(() => ({ products, getProduct, loading, error }), [products, getProduct, loading, error]);
+  const value = useMemo(() => ({ products, getProduct, loading, error, refresh: refreshCatalog }), [products, getProduct, loading, error, refreshCatalog]);
   return <CatalogContext.Provider value={value}>
-    {error && <div role="alert" className="border-b bg-muted p-4 text-center text-sm">
-      {error} <button type="button" className="underline" onClick={() => setRetry((value) => value + 1)}>Retry</button>
-    </div>}
     {children}
   </CatalogContext.Provider>;
 }
@@ -208,6 +208,15 @@ export function useCatalog() {
   const ctx = useContext(CatalogContext);
   if (!ctx) throw new Error("useCatalog must be used within CatalogProvider");
   return ctx;
+}
+
+export function CatalogNotice() {
+  const pathname = usePathname();
+  const { error, loading, refresh } = useCatalog();
+  // The shop owns its own error state; informational and account routes don't
+  // depend on the catalog. Keep the warning beside the content it affects.
+  if (!error || !(pathname === "/" || pathname.startsWith("/product/"))) return null;
+  return <div role="alert" className="store-catalog-notice"><p>{error}</p><button type="button" disabled={loading} onClick={refresh}>{loading ? "Retrying…" : "Retry collection"}</button></div>;
 }
 
 /* ------------------------------------------------------------------ */
