@@ -1,0 +1,156 @@
+[
+  {
+    "centerOffset": 0,
+    "closeSize": [
+      44,
+      44
+    ],
+    "fieldOverflow": false,
+    "fits": true,
+    "rect": {
+      "bottom": 884,
+      "height": 868,
+      "left": 16,
+      "right": 294,
+      "top": 16,
+      "width": 278,
+      "x": 16,
+      "y": 16
+    },
+    "scrolls": true,
+    "transition": "none",
+    "width": 320
+  },
+  {
+    "centerOffset": 0,
+    "closeSize": [
+      44,
+      44
+    ],
+    "fieldOverflow": false,
+    "fits": true,
+    "rect": {
+      "bottom": 884,
+      "height": 868,
+      "left": 16,
+      "right": 349,
+      "top": 16,
+      "width": 333,
+      "x": 16,
+      "y": 16
+    },
+    "scrolls": true,
+    "transition": "none",
+    "width": 375
+  },
+  {
+    "centerOffset": 0,
+    "closeSize": [
+      44,
+      44
+    ],
+    "fieldOverflow": false,
+    "fits": true,
+    "rect": {
+      "bottom": 884,
+      "height": 868,
+      "left": 16,
+      "right": 388,
+      "top": 16,
+      "width": 372,
+      "x": 16,
+      "y": 16
+    },
+    "scrolls": true,
+    "transition": "none",
+    "width": 414
+  },
+  {
+    "centerOffset": 0,
+    "closeSize": [
+      44,
+      44
+    ],
+    "fieldOverflow": false,
+    "fits": true,
+    "rect": {
+      "bottom": 884,
+      "height": 868,
+      "left": 16,
+      "right": 554,
+      "top": 16,
+      "width": 538,
+      "x": 16,
+      "y": 16
+    },
+    "scrolls": true,
+    "transition": "none",
+    "width": 580
+  },
+  {
+    "centerOffset": 0,
+    "closeSize": [
+      44,
+      44
+    ],
+    "fieldOverflow": false,
+    "fits": true,
+    "rect": {
+      "bottom": 726.3984375,
+      "height": 552.796875,
+      "left": 69,
+      "right": 689,
+      "top": 173.6015625,
+      "width": 620,
+      "x": 69,
+      "y": 173.6015625
+    },
+    "scrolls": false,
+    "transition": "none",
+    "width": 768
+  },
+  {
+    "centerOffset": 0,
+    "closeSize": [
+      44,
+      44
+    ],
+    "fieldOverflow": false,
+    "fits": true,
+    "rect": {
+      "bottom": 726.3984375,
+      "height": 552.796875,
+      "left": 197,
+      "right": 817,
+      "top": 173.6015625,
+      "width": 620,
+      "x": 197,
+      "y": 173.6015625
+    },
+    "scrolls": false,
+    "transition": "none",
+    "width": 1024
+  },
+  {
+    "centerOffset": 0,
+    "closeSize": [
+      44,
+      44
+    ],
+    "fieldOverflow": false,
+    "fits": true,
+    "rect": {
+      "bottom": 726.3984375,
+      "height": 552.796875,
+      "left": 405,
+      "right": 1025,
+      "top": 173.6015625,
+      "width": 620,
+      "x": 405,
+      "y": 173.6015625
+    },
+    "scrolls": false,
+    "transition": "none",
+    "width": 1440
+  }
+]

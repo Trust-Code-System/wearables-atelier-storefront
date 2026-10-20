@@ -27,11 +27,11 @@ The bag and header no longer advertise a prototype free-delivery threshold. Auth
 - Browser tests used an isolated in-memory API fixture on loopback with fictional `preview@example.test` records. No hosted customer data, email, real credentials, order reservations or payments were used. The fixture was stopped, and the final build uses the unchanged `.env.local` API configuration. These tests establish UI/transport behavior, not live email/payment acceptance.
 - [Responsive checks](previews/account-dashboard-responsive.json), [desktop screenshot](previews/account-dashboard-desktop.png), [phone screenshot](previews/account-dashboard-phone.png). Screenshots show fixture data.
 
-## Hosted rollout still required
+## Custom-domain rollout deferred
 
-Backend [PR #53](https://github.com/Trust-Code-System/wearables-backend/pull/53) fixes the production validator to accept the exact cookie parent as well as HTTPS subdomains. Twelve targeted tests, backend build, source/test type checks, full lint/ADR check and formatting passed; production dependency audit found no known vulnerabilities. No schema changes or database E2E were needed for this configuration-only patch. Formatting was checked with LF in the temporary checkout to avoid Windows checkout line-ending differences.
+Backend [PR #53](https://github.com/Trust-Code-System/wearables-backend/pull/53), merged as `2883843` after green CI on 20 October, fixes the production validator to accept the exact cookie parent as well as HTTPS subdomains. Twelve targeted tests, backend build, source/test type checks, full lint/ADR check and formatting passed; production dependency audit found no known vulnerabilities. No schema changes or database E2E were needed for this configuration-only patch. Formatting was checked with LF in the temporary checkout to avoid Windows checkout line-ending differences.
 
-The live custom storefront/admin origins are still absent from Railway's trusted list, and cookies still belong to the legacy TrustCode parent. Complete the coordinated [domain cutover](domain-cutover.md), including API alias/DNS/certificate, exact origins, cookie and callback settings, IaC consistency and both frontend API build settings. Users must sign in again. Production/hosted rollout and merges have not been performed. Backend rules require explicit user instruction before merging.
+The user approved code merges but deferred the domain cutover. Keep the existing development storefront/admin origins, API hostname, cookie parent and callbacks. The custom storefront/admin origins remain absent from Railway's trusted list by design until the team requests the coordinated [domain cutover](domain-cutover.md). The backend validator fix alone does not change that policy or invalidate sessions. Do not switch frontend API build settings in this release.
 
 ## Design review
 
@@ -43,3 +43,18 @@ The live custom storefront/admin origins are still absent from Railway's trusted
 | New checkout native selects and prototype delivery claims | Themed selectors and server-confirmed delivery wording | Keeps the visual system consistent with the actual shipping contract. |
 
 Reference: supplied dashboard screenshot; existing shadcn/Base UI primitives; Emil design engineering guidance on restrained motion and immediate feedback.
+
+## Dialog overlap correction
+
+The shared Base UI dialog now uses its fixed grid Viewport for centering. The entrance/exit animation no longer competes with Tailwind's individual translate property. Layout properties do not transition during viewport resizing. The account form reserves space for its 44 × 44px close button, uses readable title/description spacing, and contains its own scrolling with branded scrollbars.
+
+| Before | After | Why |
+| --- | --- | --- |
+| Animation overrides the popup's centering translate | Grid viewport keeps the popup centered | Prevents the form jumping toward the right edge. |
+| Duration utility also transitions width/max-height | No layout transitions | Keeps the form inside the viewport while resizing. |
+| Small close button and crowded header | 44px target and reserved header space | Makes the form easier to read and dismiss on phones. |
+| Motion preference can lose to open-state selectors | Explicit reduced-motion dialog rules | Removes both popup and backdrop animation when requested. |
+
+Verified dialog bounds, zero horizontal field overflow and 44px close target at 320, 375, 414, 580, 768, 1024 and 1440px. At 375 × 568px, keyboard navigation scrolls Save into view; Escape closes the dialog and returns focus to Add address. The state dropdown stays inside the phone viewport and uses the ivory palette. Evidence: [geometry checks](previews/account-dialog-responsive.json), [phone](previews/account-address-dialog-phone-fixed.png), [tablet](previews/account-address-dialog-tablet-fixed.png). Screenshots use fictional fixture records.
+
+The user approved merging code but explicitly deferred the custom-domain cutover after the team clarified that development is ongoing. Keep the legacy API, cookie parent, callbacks and both frontend API build settings. A pending Railway custom alias created during rollout preparation was removed before DNS/configuration changes; no new DNS record was submitted. The temporary IaC domain change was reverted. Revisit the domain plan only when the user requests that rollout.
