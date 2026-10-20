@@ -3,6 +3,7 @@ import { Inter, Manrope, Bodoni_Moda, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
         <Toaster position="bottom-right" gap={8} />
+        <Analytics />
       </body>
     </html>
   );
