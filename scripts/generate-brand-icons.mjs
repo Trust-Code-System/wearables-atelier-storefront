@@ -1,17 +1,37 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import sharp from "sharp";
 
-// Compact signature adapted from the original logo for small browser tabs.
-// The full original wordmark remains unchanged for the header and footer.
-const source = new URL("../public/brand/favicon-mark.png", import.meta.url);
+// Preserve the complete original signature, flourishes and lettering.
+const source = new URL("../public/brand/wearables-by-ashabi.png", import.meta.url);
 const app = new URL("../src/app/", import.meta.url);
 const preview = new URL("../public/brand/favicon-preview.png", import.meta.url);
-const artwork = await readFile(source);
+const artwork = await sharp(await readFile(source)).trim().png().toBuffer();
+const background = "#30372b";
+const gold = "#e0bc55";
 
 async function icon(size) {
-  // The source already has safe margins; extra padding makes the mark too small.
-  return sharp(artwork)
-    .resize(size, size, { fit: "contain", kernel: "lanczos3" })
+  const inset = Math.max(1, Math.round(size * 0.025));
+  // Reuse the original alpha, rather than redrawing any letter or flourish.
+  // A small alpha gain keeps fine strokes from fading at native tab sizes.
+  const gain = size <= 16 ? 1.6 : size <= 32 ? 1.25 : 1;
+  const { data, info } = await sharp(artwork)
+    .resize(size - inset * 2, size - inset * 2, {
+      fit: "inside",
+      kernel: "lanczos3",
+    })
+    .ensureAlpha()
+    .extractChannel("alpha")
+    .linear(gain, 0)
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const logo = await sharp({
+    create: { width: info.width, height: info.height, channels: 3, background: gold },
+  })
+    .joinChannel(data, { raw: { width: info.width, height: info.height, channels: 1 } })
+    .png()
+    .toBuffer();
+  return sharp({ create: { width: size, height: size, channels: 4, background } })
+    .composite([{ input: logo, gravity: "centre" }])
     .png()
     .toBuffer();
 }
@@ -38,4 +58,4 @@ await writeFile(new URL("favicon.ico", app), Buffer.concat([directory, ...images
 await writeFile(new URL("icon.png", app), await icon(512));
 await writeFile(new URL("apple-icon.png", app), await icon(180));
 await writeFile(preview, await icon(256));
-console.log("Generated compact-signature favicon (16/32/48/64), app icon (512), and Apple icon (180).");
+console.log("Generated complete-logo favicon (16/32/48/64), app icon (512), and Apple icon (180).");
