@@ -32,7 +32,6 @@ export const metadata: Metadata = {
   },
   description:
     "Wearables by Ashabi. Nigerian occasionwear, Iro & Buba and statement jewellery. Culture, luxury and elegance from Lagos.",
-  icons: { icon: "/brand/wearables-by-ashabi.png", apple: "/brand/wearables-by-ashabi.png" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
