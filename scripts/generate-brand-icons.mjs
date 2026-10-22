@@ -1,26 +1,23 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import sharp from "sharp";
 
-// Use the original artwork, including its lettering; do not redraw the brand.
-const source = new URL("../public/brand/wearables-by-ashabi.png", import.meta.url);
+// Compact signature adapted from the original logo for small browser tabs.
+// The full original wordmark remains unchanged for the header and footer.
+const source = new URL("../public/brand/favicon-mark.png", import.meta.url);
 const app = new URL("../src/app/", import.meta.url);
 const preview = new URL("../public/brand/favicon-preview.png", import.meta.url);
-const background = { r: 48, g: 55, b: 43, alpha: 1 };
-const artwork = await sharp(await readFile(source)).trim().png().toBuffer();
+const artwork = await readFile(source);
 
 async function icon(size) {
-  const inset = Math.max(1, Math.round(size * 0.06));
-  const logo = await sharp(artwork)
-    .resize(size - inset * 2, size - inset * 2, { fit: "inside" })
-    .toBuffer();
-  return sharp({ create: { width: size, height: size, channels: 4, background } })
-    .composite([{ input: logo, gravity: "centre" }])
+  // The source already has safe margins; extra padding makes the mark too small.
+  return sharp(artwork)
+    .resize(size, size, { fit: "contain", kernel: "lanczos3" })
     .png()
     .toBuffer();
 }
 
 // PNG payloads in an ICO directory support crisp tab icons at each native size.
-const sizes = [16, 32, 48];
+const sizes = [16, 32, 48, 64];
 const images = await Promise.all(sizes.map(icon));
 const directory = Buffer.alloc(6 + images.length * 16);
 directory.writeUInt16LE(1, 2);
@@ -41,4 +38,4 @@ await writeFile(new URL("favicon.ico", app), Buffer.concat([directory, ...images
 await writeFile(new URL("icon.png", app), await icon(512));
 await writeFile(new URL("apple-icon.png", app), await icon(180));
 await writeFile(preview, await icon(256));
-console.log("Generated original-logo favicon (16/32/48), app icon (512), and Apple icon (180).");
+console.log("Generated compact-signature favicon (16/32/48/64), app icon (512), and Apple icon (180).");
