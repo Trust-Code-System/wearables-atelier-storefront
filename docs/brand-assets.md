@@ -16,6 +16,8 @@ Recovered on 11 October 2026 from the user-supplied [original Wearables Atelier 
 
 All files were visually inspected. Photographer markings remain intact. No image assets from unrelated fashion sellers were used. Search also surfaced Wearables by Ashabi references, but the supplied website provided the usable logo and photo set.
 
+Browser icons use the original gold artwork on a square olive background (`#30372b`), without redrawing or modifying the source logo. `src/app/favicon.ico` contains native 16, 32 and 48px entries; `src/app/icon.png` is 512px and `src/app/apple-icon.png` is 180px. Next.js's file conventions emit the icon metadata automatically, replacing the scaffold favicon and the previous wide-logo metadata override. Regenerate with `node scripts/generate-brand-icons.mjs` (uses Sharp, installed with Next.js). `public/brand/favicon-preview.png` is the review preview.
+
 The original site's product labels do not consistently describe the photographs. The updated demo titles describe the photographed colours/styles; product copy distinguishes accessories from the full styled outfit and avoids unsupported material specifications. These are demonstration listings rather than a verified live inventory import. Existing demo prices and stock are retained.
 
 The user explicitly selected matching demo names/details to these images. Migration changes only matching original demo records, preserves their IDs, prices and stock, preserves custom records/descriptions/uploaded images, and supports previous product slugs. Orders keep their recorded history.
