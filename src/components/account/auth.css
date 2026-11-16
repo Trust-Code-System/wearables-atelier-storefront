@@ -602,3 +602,5 @@
   line-height: 1.8;
   color: var(--foreground);
 }
+.auth-session-problem { margin-bottom: 20px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--secondary); font-size: 12px; line-height: 1.8; }
+.auth-session-problem button { min-height: 44px; }

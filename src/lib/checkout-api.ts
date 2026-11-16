@@ -79,6 +79,11 @@ export async function storeRequest<T>(
       ...(key ? { "Idempotency-Key": key } : {}),
     },
     ...(method === "GET" ? {} : { body: JSON.stringify(body ?? {}) }),
+  }).catch(() => {
+    throw new StoreRequestError(
+      0,
+      "We couldn’t connect to checkout. Please try again. Check your order status before making another payment.",
+    );
   });
   if (!response.ok) {
     if (response.status === 409)

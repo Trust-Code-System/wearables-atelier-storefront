@@ -1,15 +1,13 @@
 "use client";
 
-import Image from "next/image";
+import { SafeImage as Image } from "@/components/ui/safe-image";
 import Link from "next/link";
 import { Plus, ArrowUpRight } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { useCart } from "@/lib/store";
 import { Price } from "@/components/price";
 import { WishlistButton } from "@/components/shop/wishlist-button";
-import { canAddStock, stockCount, stockLabel } from "@/lib/stock";
-
-const LABELS = { new: "Just arrived", bestseller: "Most loved", limited: "Limited edition" };
+import { BADGE_LABELS as LABELS, canAddStock, stockCount, stockLabel } from "@/lib/stock";
 
 export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const { items, addItem, setOpen, busy, loading } = useCart();
@@ -20,13 +18,13 @@ export function ProductCard({ product, priority = false }: { product: Product; p
     <article className="store-product-card" data-unavailable={soldOut || undefined}>
       <div className="store-product-image">
         <Link href={`/product/${product.slug}`} className="store-product-image-link" aria-label={`View ${product.name}`}>
-          {image ? <Image src={image} alt={product.name} fill priority={priority} sizes="(min-width: 1280px) 24vw, (min-width: 768px) 32vw, 50vw" className="product-primary-image" unoptimized /> : <span className="product-image-placeholder">Wearables Atelier</span>}
+          {image ? <Image src={image} alt={product.name} fill priority={priority} sizes="(min-width: 1280px) 24vw, (min-width: 768px) 32vw, 50vw" className="product-primary-image" unoptimized /> : <span className="product-image-placeholder">Photo coming soon</span>}
           {product.images[1] && <Image src={product.images[1]} alt="" fill sizes="(min-width: 1280px) 24vw, (min-width: 768px) 32vw, 50vw" className="product-secondary-image" unoptimized />}
         </Link>
         {!soldOut && product.badge && <span className="store-product-badge">{LABELS[product.badge]}</span>}
         {soldOut && <span className="product-unavailable-overlay">Unavailable at the moment</span>}
         <WishlistButton id={product.id} name={product.name} />
-        {!soldOut && (oneSize ? <button type="button" className="product-quick-action" disabled={busy || loading || !canAddStock(items, product)} aria-label={`Add ${product.name} to bag`} onClick={async () => { if (await addItem(product.id, null)) setOpen(true); }}><Plus size={18} aria-hidden /></button> : <Link href={`/product/${product.slug}`} className="product-quick-action" aria-label={`Choose size for ${product.name}`}><ArrowUpRight size={18} aria-hidden /></Link>)}
+        {!soldOut && (oneSize ? <button type="button" className="product-quick-action" disabled={busy || loading || !canAddStock(items, product)} aria-label={`Add ${product.name} to bag`} onClick={async () => { if (await addItem(product.id, null)) setOpen(true); }}><Plus size={16} aria-hidden /><span>Add to bag</span></button> : <Link href={`/product/${product.slug}`} className="product-quick-action" aria-label={`Choose size for ${product.name}`}><ArrowUpRight size={16} aria-hidden /><span>Choose size</span></Link>)}
       </div>
       <div className="store-product-info">
         <p className="store-product-category">{product.category === "clothing" ? "Ready to wear" : "Jewelry"}</p>

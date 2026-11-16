@@ -13,7 +13,7 @@ export default function ShippingReturnsPage() {
       title="Delivery with care."
       accent="Easy exchanges."
       introduction="The practical details for receiving your order—and what to do when something is not quite right."
-      updated="12 October 2026"
+      updated="22 October 2026"
     >
       <section className="information-section">
         <span>01</span>
@@ -36,8 +36,8 @@ export default function ShippingReturnsPage() {
             confirmed before the daily cut-off. Timing can vary by destination and courier.
           </p>
           <p>
-            Standard delivery is complimentary above the order threshold displayed on the
-            site. All other available delivery fees are shown at checkout before payment.
+            Available delivery methods and fees for your destination are shown at checkout.
+            Review the delivery charge and order total before making a payment.
           </p>
         </div>
       </section>
@@ -74,6 +74,10 @@ export default function ShippingReturnsPage() {
           <p>
             If your order arrives damaged or does not match what you ordered, contact us
             promptly with your order reference and clear photographs so we can put it right.
+          </p>
+          <p>
+            For other refund requests, contact us before ordering to confirm eligibility,
+            the return window and expected refund processing time for your item.
           </p>
         </div>
       </section>

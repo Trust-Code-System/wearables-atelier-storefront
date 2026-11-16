@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { SafeImage as Image } from "@/components/ui/safe-image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
@@ -385,7 +385,8 @@ export default function CheckoutPage() {
   if (recovering)
     return (
       <div className="px-6 py-24 text-center" role="status">
-        Checking your checkout…
+        <p>Loading your checkout…</p>
+        <p className="mt-2 text-sm text-muted-foreground">This can take a few seconds on a slow connection.</p>
       </div>
     );
   if (!account || (!saved && recoveryFailed))
@@ -486,7 +487,7 @@ export default function CheckoutPage() {
               >
                 {i < step ? <CheckIcon className="size-3" /> : i + 1}
               </span>
-              <span className="max-sm:hidden">{label}</span>
+              <span className={cn(i !== step && "max-sm:hidden")}>{label}</span>
             </button>
             {i < STEPS.length - 1 && <Separator className="w-8 sm:w-14" />}
           </li>
@@ -577,6 +578,7 @@ export default function CheckoutPage() {
                     Delivery method
                   </h2>
                   <ShippingSelector onChange={setSelection} />
+                  {!selection && <p className="text-sm text-muted-foreground" role="status">Choose your state, area and delivery method above to continue.</p>}
                   <div className="mt-2 flex items-center justify-between">
                     <Button variant="ghost" onClick={() => goTo(0)}>
                       <ArrowLeftIcon data-icon="inline-start" />
@@ -621,14 +623,14 @@ export default function CheckoutPage() {
                           Final total: ₦
                           {cartNaira(saved.order.totalKobo).toLocaleString(
                             "en-NG",
-                            { minimumFractionDigits: 2 },
+                            { minimumFractionDigits: 0, maximumFractionDigits: 2 },
                           )}
                         </p>
                         <p className="mt-2 text-muted-foreground">
                           Included VAT: ₦
                           {cartNaira(saved.order.taxKobo).toLocaleString(
                             "en-NG",
-                            { minimumFractionDigits: 2 },
+                            { minimumFractionDigits: 0, maximumFractionDigits: 2 },
                           )}
                           . Payment is confirmed only after the server verifies
                           it.
@@ -641,7 +643,7 @@ export default function CheckoutPage() {
                     </p>
                     {saved?.order.payment.status === "pending" && (
                       <SlideCommit
-                        label={`Continue to Paystack — ₦${total.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`}
+                        label={`Continue to Paystack — ₦${total.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`}
                         processingLabel="Opening Paystack…"
                         doneLabel="Opening Paystack"
                         state={payState}
@@ -723,7 +725,7 @@ export default function CheckoutPage() {
                   <span>
                     ₦
                     {cartNaira(line.totalKobo).toLocaleString("en-NG", {
-                      minimumFractionDigits: 2,
+                      minimumFractionDigits: 0, maximumFractionDigits: 2,
                     })}
                   </span>
                 </div>
@@ -799,7 +801,7 @@ export default function CheckoutPage() {
               <dt>Total</dt>
               <dd className="font-display tabular-nums">
                 {saved ? (
-                  `₦${total.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`
+                  `₦${total.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
                 ) : (
                   <Price amountNGN={total} />
                 )}

@@ -3,27 +3,18 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-const SESSION_KEY = "atelier-intro-seen";
-
-/** A home-page welcome, independent of page loading and document scrolling. */
+/** Render the welcome in the initial HTML, before the homepage can paint. */
 export function BrandIntro() {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (media.matches) return;
-    try {
-      if (sessionStorage.getItem(SESSION_KEY)) return;
-    } catch {
-      // The welcome also works when browser storage is unavailable.
-    }
+    if (!visible) return;
 
     let timer: number | undefined;
     const frame = requestAnimationFrame(() => {
-      // Mark it seen only after mounting; React's development effect replay
-      // must not consume the welcome before its first frame.
-      try { sessionStorage.setItem(SESSION_KEY, "yes"); } catch { /* Storage is optional. */ }
-      setVisible(true);
+      // Hold the curtains closed until hydration, even when scripts load slowly.
+      setPlaying(true);
       timer = window.setTimeout(() => setVisible(false), 1700);
     });
     const dismiss = () => {
@@ -36,7 +27,6 @@ export function BrandIntro() {
     window.addEventListener("pointerdown", dismiss);
     window.addEventListener("wheel", dismiss, { passive: true });
     window.addEventListener("touchmove", dismiss, { passive: true });
-    media.addEventListener("change", dismiss);
     return () => {
       cancelAnimationFrame(frame);
       clearTimeout(timer);
@@ -44,13 +34,12 @@ export function BrandIntro() {
       window.removeEventListener("pointerdown", dismiss);
       window.removeEventListener("wheel", dismiss);
       window.removeEventListener("touchmove", dismiss);
-      media.removeEventListener("change", dismiss);
     };
-  }, []);
+  }, [visible]);
 
   if (!visible) return null;
 
-  return <div className="atelier-intro" onPointerDown={() => setVisible(false)}>
+  return <><noscript><style>{`.atelier-intro { display: none; }`}</style></noscript><div className="atelier-intro" data-playing={playing} data-lenis-prevent onPointerDown={() => setVisible(false)}>
     <div className="atelier-intro-curtain atelier-intro-left" aria-hidden="true" />
     <div className="atelier-intro-curtain atelier-intro-right" aria-hidden="true" />
     <div className="atelier-intro-copy" aria-hidden="true">
@@ -59,5 +48,5 @@ export function BrandIntro() {
       <span>Culture. Luxury. Elegance.</span>
     </div>
     <button type="button" className="atelier-intro-skip" onClick={() => setVisible(false)}>Skip intro <span aria-hidden="true">↗</span></button>
-  </div>;
+  </div></>;
 }

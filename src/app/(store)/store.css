@@ -36,6 +36,9 @@
 .store-catalog-notice { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 16px; padding: 12px var(--store-gutter); background: var(--secondary); border-bottom: 1px solid var(--border); font-size: 13px; line-height: 1.6; text-align: center; }
 .store-catalog-notice button { min-height: 44px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
 .catalog-inline-state { padding-block: 20px; font-size: 13px; line-height: 1.8; color: var(--muted-foreground); }
+.catalog-availability { margin-bottom: 20px; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--secondary); font-size: 14px; line-height: 1.6; }
+.catalog-availability > div { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; margin-top: 12px; }
+.catalog-availability a { display: inline-flex; align-items: center; min-height: 44px; }
 .storefront .font-display { font-family: var(--font-manrope), sans-serif; font-weight: 500; font-variation-settings: normal; letter-spacing: -0.04em; }
 .storefront a, .storefront button { -webkit-tap-highlight-color: transparent; }
 .storefront :is(a, button):focus-visible { outline: 1px solid var(--ring); outline-offset: 3px; }
@@ -123,6 +126,10 @@
 .jewelry-edit h2 em, .atelier-story h2 em { font-family: var(--font-editorial), Georgia, serif; font-weight: 400; letter-spacing: -0.045em; }
 .jewelry-edit-copy > p:not(.store-label) { max-width: 310px; margin: 24px 0; font-size: 12px; line-height: 1.9; color: var(--muted-foreground); }
 .jewelry-product-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+.jewelry-edit-visual { min-width: 0; }
+.jewelry-edit-image { position: relative; display: block; aspect-ratio: 6 / 5; overflow: hidden; border-radius: var(--store-radius-panel); background: #d6d3c6; }
+.jewelry-edit-image img { object-position: center 85%; }
+.jewelry-edit-image:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
 .atelier-story { display: grid; grid-template-columns: 1fr 1.15fr; }
 .atelier-portrait { position: relative; min-height: 620px; overflow: hidden; }
 .atelier-portrait img { object-position: center 40%; }
@@ -731,12 +738,15 @@
   .faq-list details > p { padding: 0 8px 26px 42px; font-size: 13px; }
 }
 
-/* A brief home-page welcome. Never locks the document or waits for assets. */
-.atelier-intro { position: fixed; inset: 0; z-index: 200; overflow: clip; pointer-events: none; }
+/* Present in the initial HTML; only start the reveal after hydration. */
+.atelier-intro { position: fixed; inset: 0; z-index: 200; overflow: clip; pointer-events: auto; }
 .atelier-intro-curtain { position: absolute; top: 0; bottom: 0; width: 50.1%; background: repeating-linear-gradient(90deg, #30372b 0, #343d2e 9%, #30372b 18%); will-change: transform; }
-.atelier-intro-left { left: 0; border-right: 1px solid rgb(198 173 100 / 25%); animation: atelier-curtain-left 850ms 750ms cubic-bezier(.76, 0, .24, 1) both; }
-.atelier-intro-right { right: 0; animation: atelier-curtain-right 850ms 750ms cubic-bezier(.76, 0, .24, 1) both; }
-.atelier-intro-copy { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 28px; text-align: center; color: #fafaf7; animation: atelier-intro-copy 1200ms ease both; }
+.atelier-intro-left { left: 0; border-right: 1px solid rgb(198 173 100 / 25%); }
+.atelier-intro-right { right: 0; }
+.atelier-intro-copy { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 28px; text-align: center; color: #fafaf7; }
+.atelier-intro[data-playing="true"] .atelier-intro-left { animation: atelier-curtain-left 850ms 750ms cubic-bezier(.76, 0, .24, 1) both; }
+.atelier-intro[data-playing="true"] .atelier-intro-right { animation: atelier-curtain-right 850ms 750ms cubic-bezier(.76, 0, .24, 1) both; }
+.atelier-intro[data-playing="true"] .atelier-intro-copy { animation: atelier-intro-copy 1200ms ease both; }
 .atelier-intro-copy img { width: min(340px, 65vw); height: auto; }
 .atelier-intro-copy p { font-size: clamp(22px, 3vw, 34px); letter-spacing: -.035em; }
 .atelier-intro-copy em { font-family: var(--font-editorial), Georgia, serif; font-weight: 400; }
@@ -746,7 +756,7 @@
 @keyframes atelier-curtain-left { to { transform: translateX(-101%); } }
 @keyframes atelier-curtain-right { to { transform: translateX(101%); } }
 @keyframes atelier-intro-copy { 0% { opacity: 0; transform: translateY(8px); } 20%, 58% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-6px); } }
-@media (prefers-reduced-motion: reduce) { .atelier-intro { display: none; } }
+@media (prefers-reduced-motion: reduce) { .atelier-intro[data-playing="true"] > * { animation: none; } }
 
 /* ---- Micro-interactions (React Bits-inspired) ------------------------- */
 
@@ -803,4 +813,43 @@
 
 @media (prefers-reduced-motion: reduce) {
   .spring-check:active .spring-check-box { transform: none; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Launch QA pass (2026-10-22): readable sizes, tap targets, fallbacks  */
+/* ------------------------------------------------------------------ */
+.product-image-placeholder { overflow: hidden; padding: 4px; background: var(--muted); text-align: center; line-height: 1.25; letter-spacing: 0.02em; }
+.product-quick-action { width: auto; min-width: 44px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; white-space: nowrap; }
+.product-quick-action span { line-height: 1; }
+.store-product-page > nav a { display: inline-flex; align-items: center; min-height: 32px; }
+.product-detail-info [data-slot="accordion-trigger"] { min-height: 44px; align-items: center; }
+.product-detail-info [role="radio"] { min-width: 44px; min-height: 44px; }
+
+@media (max-width: 767px) {
+  .store-announcement, .store-announcement-delivery, .campaign-topline, .campaign-copy .store-label, .campaign-scroll,
+  .campaign-index, .store-section-heading .store-label, .collection-caption .store-label, .collection-image-caption,
+  .catalog-intro-copy > .store-label, .catalog-intro-caption, .store-footer-bottom, .store-product-page > nav,
+  .store-product-category, .store-product-badge, .store-text-link, .collection-navigation > a, .store-bag-count,
+  .store-mobile-nav small, .catalog-intro-note, .store-service-strip small, .store-service-strip > div > span,
+  .atelier-footer-bottom, .atelier-footer-bottom .atelier-footer-legal a, .atelier-footer-invitation .store-label,
+  .atelier-footer-directory nav .store-label { font-size: 11px; }
+  .store-bag-count { width: 19px; height: 19px; }
+  .product-detail-info [data-slot="accordion-trigger"] { font-size: 11px; }
+  .atelier-footer-bottom .atelier-footer-legal a, .store-footer-bottom a { display: inline-flex; align-items: center; min-height: 44px; }
+  /* Keep the buying controls in reach on a long product page. */
+  .product-purchase-actions { position: sticky; bottom: 0; z-index: 6; margin-inline: calc(var(--store-gutter) * -1); padding: 12px var(--store-gutter); background: var(--background); border-top: 1px solid var(--border); }
+  .product-purchase-actions > div:first-child { min-height: 48px; }
+  .product-purchase-actions > div:first-child button { min-width: 44px; }
+}
+.contact-direct { display: grid; gap: 4px; margin: 0 0 20px; padding: 0; list-style: none; font-size: 14px; }
+.contact-direct li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; min-height: 44px; }
+.contact-direct span { min-width: 140px; color: var(--muted-foreground); font-size: 12px; }
+.contact-direct a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 767px) {
+  /* On a phone the intro photos pushed the first product ~1,500px down the page. */
+  .catalog-intro-photos { display: none; }
+}
+@media (max-width: 767px) {
+  /* A square photo keeps the name, price and sizes within the first screen and a half. */
+  .product-detail-gallery > div:first-child { aspect-ratio: 1 / 1; }
 }

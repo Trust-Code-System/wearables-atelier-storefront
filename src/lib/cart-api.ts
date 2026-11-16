@@ -25,6 +25,13 @@ export function cartNaira(kobo: string): number {
   return Number(kobo) / 100;
 }
 
+/** `contact` marks failures a customer cannot fix themselves, so the UI can offer a human fallback. */
+export class CartError extends Error {
+  constructor(message: string, readonly contact = false) {
+    super(message);
+  }
+}
+
 export async function cartRequest(method = "GET", path = "", quantity?: number): Promise<SavedCart> {
   const response = await fetch(`${getApiBaseUrl()}/api/v1/store/cart${path}`, {
     method,
@@ -35,11 +42,15 @@ export async function cartRequest(method = "GET", path = "", quantity?: number):
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(quantity === undefined ? {} : { quantity }),
     } : {}),
+  }).catch(() => {
+    throw new CartError("We couldn’t reach the shop. Check your internet connection and try again.");
   });
   if (!response.ok) {
-    if (response.status === 409) throw new Error("Your bag or availability changed. Review your bag and try again.");
-    if (response.status === 429) throw new Error("Too many bag updates. Please wait a moment and try again.");
-    throw new Error("Unable to update your bag. Please try again.");
+    if (response.status === 409) throw new CartError("Your bag or availability changed. Review your bag and try again.");
+    if (response.status === 429) throw new CartError("Too many bag updates. Please wait a moment and try again.");
+    if (response.status === 403) throw new CartError("The shop would not accept this change. Refresh the page and try again.", true);
+    if (response.status >= 500) throw new CartError("The shop is having trouble saving your bag. Nothing was added. Please try again in a minute.", true);
+    throw new CartError("We could not update your bag. Please try again.", true);
   }
   const cart = await response.json() as SavedCart;
   // Validate money before publishing a snapshot to the UI.

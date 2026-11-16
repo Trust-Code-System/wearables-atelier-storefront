@@ -4,12 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowRight, ArrowUpRight } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import { useCatalog, useSettings } from "@/lib/store";
+import { useCatalog } from "@/lib/store";
 import { ProductCard } from "@/components/shop/product-card";
 import { Magnetic } from "@/components/micro/magnetic";
 import { BlurText } from "@/components/micro/blur-text";
 import { BrandIntro } from "@/components/micro/brand-intro";
-import { formatPrice } from "@/lib/format";
 import type { ReactNode } from "react";
 import { brandContact } from "@/lib/brand-contact";
 
@@ -19,8 +18,7 @@ function EditorialReveal({ children, className = "" }: { children: ReactNode; cl
 }
 
 export default function HomePage() {
-  const { products } = useCatalog();
-  const { settings } = useSettings();
+  const { products, loading, error } = useCatalog();
   const featured = [...products].sort((a, b) => Number(b.badge === "bestseller") - Number(a.badge === "bestseller")).slice(0, 4);
   const jewelry = products.filter((product) => product.category === "jewelry").slice(0, 2);
 
@@ -36,10 +34,10 @@ export default function HomePage() {
         <div className="campaign-copy">
           <p className="store-label">From Lagos. For your moment.</p>
           <h1 id="campaign-title"><BlurText text="Wear it" /><br /><BlurText text="your way." className="campaign-title-italic" delay={0.12} /></h1>
-          <p className="campaign-description">Rich colour. Statement silhouettes.<br />Nigerian elegance, made personal.</p>
-          <Magnetic strength={0.22}><Link href="/shop" className="store-button store-button-light">Discover the collection <ArrowUpRight size={17} aria-hidden /></Link></Magnetic>
+          <p className="campaign-description">Occasionwear and statement jewellery from Lagos, Nigeria.<br />Rich colour. Nigerian elegance, made personal.</p>
+          <Magnetic strength={0.22}><Link href="/shop" className="store-button store-button-light">Shop all products <ArrowUpRight size={17} aria-hidden /></Link></Magnetic>
         </div>
-        <a href="#bestsellers" className="campaign-scroll" aria-label="Explore the collection below"><ArrowDown size={18} aria-hidden /><span>There’s more to discover</span></a>
+        <a href="#bestsellers" className="campaign-scroll" aria-label="Explore the collection below"><ArrowDown size={18} aria-hidden /><span>See our products</span></a>
         <span className="campaign-index" aria-hidden>01 — 26</span>
       </section>
 
@@ -52,12 +50,13 @@ export default function HomePage() {
 
       <section id="bestsellers" className="store-section">
         <EditorialReveal className="store-section-heading">
-          <div><p className="store-label">The Ashabi collection</p><h2>Made for your moment.</h2></div>
-          <Link href="/shop" className="store-text-link">Shop all pieces <ArrowUpRight size={17} aria-hidden /></Link>
+          <div><p className="store-label">Our products</p><h2>Made for your moment.</h2></div>
+          <Link href="/shop" className="store-text-link">Shop all products <ArrowUpRight size={17} aria-hidden /></Link>
         </EditorialReveal>
         <div className="home-product-grid">
           {featured.map((product) => <EditorialReveal key={product.id}><ProductCard product={product} /></EditorialReveal>)}
         </div>
+        {(loading || error || featured.length === 0) && <p className="catalog-inline-state" role="status">{loading ? "Loading products…" : error ? "Products could not be loaded. Use “Try again” above, or contact us for help." : "New products will appear here when available."}</p>}
       </section>
 
       <section className="collection-editorial" aria-label="Our two collections">
@@ -84,7 +83,22 @@ export default function HomePage() {
           <p>Statement necklaces. Coordinated earrings. The finishing touches that bring your occasion look together.</p>
           <Link href="/shop?category=jewelry" className="store-text-link">Explore jewelry <ArrowRight size={17} aria-hidden /></Link>
         </EditorialReveal>
-        <div className="jewelry-product-grid">{jewelry.map((product) => <EditorialReveal key={product.id}><ProductCard product={product} /></EditorialReveal>)}</div>
+        <div className="jewelry-edit-visual">
+          {jewelry.length > 0 ? (
+            <div className="jewelry-product-grid">{jewelry.map((product) => <EditorialReveal key={product.id}><ProductCard product={product} /></EditorialReveal>)}</div>
+          ) : (
+            <Link href="/shop?category=jewelry" className="jewelry-edit-image">
+              <Image
+                src="/collection/look-05.png"
+                alt="Statement necklace and matching earrings styled with a lime green gele and occasionwear"
+                fill
+                sizes="(min-width: 768px) 50vw, 100vw"
+                className="object-cover"
+              />
+            </Link>
+          )}
+          {(loading || error || jewelry.length === 0) && <p className="catalog-inline-state" role="status">{loading ? "Loading jewelry…" : error ? "Jewelry could not be loaded. Use “Try again” above." : "New jewelry will appear here when available."}</p>}
+        </div>
       </section>
 
       <section id="craft" className="atelier-story">
@@ -100,9 +114,9 @@ export default function HomePage() {
       </section>
 
       <div className="store-service-strip">
-        <div><span>01</span><p>Delivered to your door<small>Complimentary standard delivery over {formatPrice(settings.freeShippingThresholdNGN, "NGN")}</small></p></div>
+        <div><span>01</span><p>Delivered to your door<small>Available delivery methods and fees shown at checkout</small></p></div>
         <div><span>02</span><p>Find your fit<small>Numbered clothing sizes. Clear product details.</small></p></div>
-        <div><span>03</span><p>Here to help<small><a href={brandContact.whatsapp} target="_blank" rel="noopener noreferrer">Talk to the atelier <ArrowUpRight size={12} aria-hidden /></a></small></p></div>
+        <div><span>03</span><p>Here to help<small><a href={brandContact.whatsapp} target="_blank" rel="noopener noreferrer">Message us on WhatsApp <ArrowUpRight size={12} aria-hidden /></a></small></p></div>
       </div>
     </>
   );

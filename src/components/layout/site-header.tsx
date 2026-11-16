@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -67,7 +68,7 @@ function DesktopNavigation() {
 }
 
 export function SiteHeader() {
-  const { count, isOpen: bagOpen, setOpen } = useCart();
+  const { count, isOpen: bagOpen, setOpen, loading: cartLoading, error: cartError } = useCart();
   const { products, loading, error, refresh } = useCatalog();
   const { currency } = useCurrency();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -136,7 +137,7 @@ export function SiteHeader() {
             <Tip label="Search ⌘K">
               <button className="store-icon-button store-search-trigger" aria-label="Search the collection" onClick={() => setSearchOpen(true)}><Search size={18} strokeWidth={1.7} aria-hidden /><span>Search</span></button>
             </Tip>
-            <button className="store-bag-button" aria-label={`Open shopping bag, ${count} ${count === 1 ? "item" : "items"}`} onClick={() => setOpen(true)}><ShoppingBag size={18} strokeWidth={1.7} aria-hidden /><span className="store-bag-text">Bag</span><motion.span key={count} className="store-bag-count" initial={reduceMotion ? false : { scale: 1.5 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 22 }}>{count}</motion.span></button>
+            <button className="store-bag-button" aria-label={`Open shopping bag, ${cartLoading ? "checking items" : cartError ? "item count unavailable, we could not check your bag" : `${count} ${count === 1 ? "item" : "items"}`}`} onClick={() => setOpen(true)}><ShoppingBag size={18} strokeWidth={1.7} aria-hidden /><span className="store-bag-text">Bag</span><motion.span key={cartLoading ? "loading" : cartError ? "error" : count} className="store-bag-count" initial={reduceMotion ? false : { scale: 1.5 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 22 }}>{cartError ? "?" : count}</motion.span></button>
           </div>
         </WarmGroup>
       </div>
@@ -144,9 +145,9 @@ export function SiteHeader() {
         <DialogContent className="store-search-panel sm:max-w-xl" overlayClassName="store-search-backdrop" data-lenis-prevent>
           <DialogHeader><DialogTitle>Find your next favourite.</DialogTitle></DialogHeader>
           <label className="sr-only" htmlFor="store-search">Search products</label>
-          <input id="store-search" className="store-search-input" placeholder="Search clothing, jewelry, a favourite piece…" value={query} onChange={(event) => setQuery(event.target.value)} autoComplete="off" />
-          <p className="store-label" aria-live="polite">{loading ? "Loading the collection…" : error ? "Collection unavailable" : query.trim() ? `${matching.length === 8 ? "Showing up to 8" : matching.length} matching ${matching.length === 1 ? "piece" : "pieces"}` : "Explore the collection"}</p>
-          <div className="store-search-results">{error ? <div className="catalog-inline-state" role="status"><p>We couldn’t load the collection. Please try again.</p><button type="button" className="store-text-link" disabled={loading} onClick={refresh}>{loading ? "Retrying…" : "Try again"}<ArrowUpRight size={15} aria-hidden /></button></div> : loading ? <p role="status" className="py-8 text-sm text-muted-foreground">Finding your next favourite…</p> : matching.length ? matching.map((product) => <Link key={product.id} href={`/product/${product.slug}`} onClick={() => setSearchOpen(false)}>{product.images[0] && <span className="relative size-12 shrink-0"><Image src={product.images[0]} alt="" fill sizes="48px" className="object-cover" unoptimized /></span>}<span className="flex-1">{product.name}<small>{product.category}</small></span><span>{formatPrice(product.priceNGN, currency)}</span><ArrowUpRight size={15} aria-hidden /></Link>) : <p className="py-8 text-sm text-muted-foreground">No pieces found. Try “gele”, “crystal”, or “jewelry”.</p>}</div>
+          <input id="store-search" className="store-search-input" placeholder="Search clothing or jewelry" value={query} onChange={(event) => setQuery(event.target.value)} autoComplete="off" />
+          <p className="store-label" aria-live="polite">{loading ? "Loading products…" : error ? "Products unavailable" : query.trim() ? matching.length === 8 ? "Showing the first 8 products" : `${matching.length} ${matching.length === 1 ? "product" : "products"} found` : "Type to search"}</p>
+          <div className="store-search-results">{error ? <div className="catalog-inline-state" role="status"><p>We couldn’t load the collection. Please try again.</p><button type="button" className="store-text-link" disabled={loading} onClick={refresh}>{loading ? "Retrying…" : "Try again"}<ArrowUpRight size={15} aria-hidden /></button></div> : loading ? <p role="status" className="py-8 text-sm text-muted-foreground">Finding your next favourite…</p> : matching.length ? matching.map((product) => <Link key={product.id} href={`/product/${product.slug}`} onClick={() => setSearchOpen(false)}>{product.images[0] && <span className="relative size-12 shrink-0"><SafeImage src={product.images[0]} alt="" fill sizes="48px" className="object-cover" unoptimized /></span>}<span className="flex-1">{product.name}<small>{product.category}</small></span><span>{formatPrice(product.priceNGN, currency)}</span><ArrowUpRight size={15} aria-hidden /></Link>) : <p className="py-8 text-sm text-muted-foreground">No products found. Try “gele”, “crystal” or “jewelry”.</p>}</div>
         </DialogContent>
       </Dialog>
     </header>

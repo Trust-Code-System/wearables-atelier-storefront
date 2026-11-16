@@ -13,6 +13,8 @@ export async function accountSession(): Promise<AccountSession | null> {
     credentials: "include",
     cache: "no-store",
     signal: AbortSignal.timeout(10000),
+  }).catch(() => {
+    throw new Error("We couldn’t connect to accounts. Please try again.");
   });
   if (response.status === 401) return null;
   if (!response.ok)
@@ -48,13 +50,21 @@ export async function accountAction(
     signal: AbortSignal.timeout(15000),
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+  }).catch(() => {
+    throw new Error("We couldn’t connect to accounts. Please try again.");
   });
   if (!response.ok) {
     if (response.status === 429)
       throw new Error("Please wait a moment before trying again.");
+    const detail = (await response.json().catch(() => null)) as { code?: string } | null;
+    // A 5xx, or a bare 403 with no account error code, means the service refused
+    // the request; blaming the customer's password would be wrong.
+    const serviceFailure = response.status >= 500 || (response.status === 403 && !detail?.code);
+    if (serviceFailure)
+      throw new Error("We could not complete this right now. Nothing was changed. Please try again in a minute.");
     if (action === "sign-in/email")
       throw new Error(
-        "Unable to sign in. Check your email and password, and verify your email first. You can resend the verification email below.",
+        "We could not sign you in. Check your email and password. If you have just created an account, verify your email first: use “Send the verification email again” below.",
       );
     if (action === "reset-password")
       throw new Error(

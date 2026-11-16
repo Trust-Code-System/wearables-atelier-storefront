@@ -5,9 +5,12 @@ export function stockCount(product: Pick<Product, "stock">): number {
   return Number.isFinite(product.stock) ? Math.max(0, Math.floor(product.stock)) : 0;
 }
 
+/** One wording for a product status badge everywhere it appears. */
+export const BADGE_LABELS = { new: "Just arrived", bestseller: "Most loved", limited: "Limited edition" } as const;
+
 export function stockLabel(product: Pick<Product, "stock">): string {
   const count = stockCount(product);
-  return count === 0 ? "Unavailable at the moment" : `${count} ${count === 1 ? "piece" : "pieces"} available`;
+  return count === 0 ? "Unavailable at the moment" : `${count} in stock`;
 }
 
 export function cartProductQty(items: CartItem[], productId: string): number {

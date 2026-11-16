@@ -27,8 +27,8 @@ test("live size prices and stock stay independent across bag lines", () => {
 });
 
 test("availability uses the recorded total and singular/plural labels", () => {
-  assert.equal(stockLabel(product), "8 pieces available");
-  assert.equal(stockLabel({ stock: 1 }), "1 piece available");
+  assert.equal(stockLabel(product), "8 in stock");
+  assert.equal(stockLabel({ stock: 1 }), "1 in stock");
   for (const stock of [0, -1, NaN]) assert.equal(stockLabel({ stock }), "Unavailable at the moment");
 });
 

@@ -23,9 +23,9 @@ const questions = [
       "We deliver within Lagos and across Nigeria. Standard nationwide delivery usually takes 2–4 business days after dispatch. Same-day delivery may be available within Lagos for orders confirmed early enough.",
   },
   {
-    question: "Is delivery complimentary?",
+    question: "How much does delivery cost?",
     answer:
-      "Standard delivery is complimentary when your order reaches the threshold shown in the announcement bar and at checkout. For smaller orders, the available delivery fee is shown before payment.",
+      "Available delivery methods and fees are shown at checkout for your destination. Review the delivery charge and order total before making a payment.",
   },
   {
     question: "Can I exchange or return an item?",
@@ -59,7 +59,7 @@ export default function FaqPage() {
     >
       <div className="faq-list">
         {questions.map((item, index) => (
-          <details key={item.question} name="frequently-asked-questions" open={index === 0}>
+          <details key={item.question} open={index === 0}>
             <summary>
               <span>{String(index + 1).padStart(2, "0")}</span>
               {item.question}

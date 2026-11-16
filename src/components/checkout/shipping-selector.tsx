@@ -124,7 +124,9 @@ export function ShippingSelector({
   const version = methods.data?.meta.version ?? 0;
   const loading = catalog.loading || areas.loading || methods.loading;
   const error = catalog.error || areas.error || methods.error;
-  const chosen = options.find((value) => value.methodId === methodId);
+  // With a single delivery method there is nothing to compare, so select it for the customer.
+  const selectedMethodId = methodId || (options.length === 1 ? options[0].methodId : "");
+  const chosen = options.find((value) => value.methodId === selectedMethodId);
   const state = states.find((value) => value.id === stateId);
   const destination = destinations.find((value) => value.id === destinationId);
   const lga = lgas.find((value) => value.id === lgaId);
@@ -299,7 +301,7 @@ export function ShippingSelector({
             <input
               type="radio"
               name="delivery-method"
-              checked={methodId === option.methodId}
+              checked={selectedMethodId === option.methodId}
               onChange={() => setMethodId(option.methodId)}
             />
             <span className="flex-1">
@@ -311,7 +313,7 @@ export function ShippingSelector({
             <span>
               ₦
               {cartNaira(option.feeKobo).toLocaleString("en-NG", {
-                minimumFractionDigits: 2,
+                minimumFractionDigits: 0, maximumFractionDigits: 2,
               })}
             </span>
           </label>
