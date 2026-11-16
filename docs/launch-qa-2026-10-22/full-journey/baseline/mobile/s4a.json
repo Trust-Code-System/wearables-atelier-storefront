@@ -1,0 +1,19 @@
+[
+ {
+  "step": "landing hydrated (bag badge resolved)",
+  "atSec": "44.0",
+  "bytes": 1741747
+ },
+ {
+  "step": "tap CTA -> /shop URL",
+  "atSec": "51.0",
+  "bytes": 1816771,
+  "stepMs": 4999
+ },
+ {
+  "step": "shop product links present",
+  "atSec": "56.9",
+  "bytes": 1875164,
+  "stepMs": 114
+ }
+]

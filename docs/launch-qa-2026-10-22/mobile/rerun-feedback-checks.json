@@ -1,0 +1,83 @@
+{
+  "before": "Skip to content\nDelivery options at checkout\n…\n\nThe collection is temporarily unavailable. Please try again.\n\nRetry\nContact us for help\n\nWEARABLES ATELIER / THE COLLECTION\n\nThe Ashabi edit.\n\nNigerian occasionwear and statement jewellery. Culture, luxury and elegance, brought together.\n\nFrom Lagos.\nFor your moment.\n\nOccasionwear & statement jewellery\n\nProduct availability could not be checked\n\nFilters\nFeatured\n\nA LITTLE MORE YOU.\n\nYou bring the occasion.\nWe’ll bring the style.\n\nFinding your fit. Finishing your look.\nLet’s find something that feels like you.\n\nTalk to the atelier\n\nCulture. Luxury. Elegance.\nFrom Lagos, for your moment.\n\nMade personal. Worn with confidence.\n\nTHE COLLECTION\n\nShop all pieces\nNew arrivals\nClothing\nJewelry\n\nTHE ATELIER\n\nAbout us\nOur point of view\nContact & assistance\n\nCUSTOMER CARE\n\nFrequently asked questions\nShipping & returns\nYour wishlist\nYour account\nBack to top\nInstagram\nTikTok\nYouTube\nWhatsApp\nD4 Shitta Road, Surulere, Lagos\n\n© 2026 Wearables Atelier\n\nPrivacy\nTerms",
+  "notices": [
+    {
+      "text": "The collection is temporarily unavailable. Please try again.\n\nRetry\nContact us for help",
+      "box": {
+        "x": 20,
+        "y": 142,
+        "width": 335,
+        "height": 134.78125,
+        "top": 142,
+        "right": 355,
+        "bottom": 276.78125,
+        "left": 20
+      }
+    },
+    {
+      "text": "",
+      "box": {
+        "x": -1,
+        "y": -1,
+        "width": 1,
+        "height": 1,
+        "top": -1,
+        "right": 0,
+        "bottom": 0,
+        "left": -1
+      }
+    }
+  ],
+  "buttons": [
+    "",
+    "Search",
+    "Bag…",
+    "Retry",
+    "Filters",
+    "Back to top",
+    ""
+  ],
+  "retryPending": "Skip to content\nDelivery options at checkout\n—\n\nLoading the collection…\n\nWEARABLES ATELIER / THE COLLECTION\n\nThe Ashabi edit.\n\nNigerian occasionwear and statement jewellery. Culture, luxury and elegance, brought together.\n\nFrom Lagos.\nFor your moment.\n\nOccasionwear & statement jewellery\n\nChecking available products…\n\nFilters\nFeatured\n\nA LITTLE MORE YOU.\n\nYou bring the occasion.\nWe’ll bring the style.\n\nFinding your fit. Finishing your look.\nLet’s find something that feels like you.\n\nTalk to the atelier\n\nCulture. Luxury. Elegance.\nFrom Lagos, for your moment.\n\nMade personal. Worn with confidence.\n\nTHE COLLECTION\n\nShop all pieces\nNew arrivals\nClothing\nJewelry\n\nTHE ATELIER\n\nAbout us\nOur point of view\nContact & assistance\n\nCUSTOMER CARE\n\nFrequently asked questions\nShipping & returns\nYour wishlist\nYour account\nBack to top\nInstagram\nTikTok\nYouTube\nWhatsApp\nD4 Shitta Road, Surulere, Lagos\n\n© 2026 Wearables Atelier\n\nPrivacy\nTerms",
+  "retryButtons": [
+    {
+      "text": "",
+      "disabled": false,
+      "ariaLabel": "Open menu"
+    },
+    {
+      "text": "",
+      "disabled": false,
+      "ariaLabel": "Search the collection"
+    },
+    {
+      "text": "—",
+      "disabled": false,
+      "ariaLabel": "Open shopping bag, item count unavailable"
+    },
+    {
+      "text": "Filters",
+      "disabled": false,
+      "ariaLabel": "Open filters"
+    },
+    {
+      "text": "Back to top",
+      "disabled": false,
+      "ariaLabel": "Back to top"
+    },
+    {
+      "text": "",
+      "disabled": false,
+      "ariaLabel": "Open Next.js Dev Tools"
+    }
+  ],
+  "bag": "Skip to content\nDelivery options at checkout\n—\n\nThe collection is temporarily unavailable. Please try again.\n\nRetry\nContact us for help\n\nWEARABLES ATELIER / THE COLLECTION\n\nThe Ashabi edit.\n\nNigerian occasionwear and statement jewellery. Culture, luxury and elegance, brought together.\n\nFrom Lagos.\nFor your moment.\n\nOccasionwear & statement jewellery\n\nProduct availability could not be checked\n\nFilters\nFeatured\n\nA LITTLE MORE YOU.\n\nYou bring the occasion.\nWe’ll bring the style.\n\nFinding your fit. Finishing your look.\nLet’s find something that feels like you.\n\nTalk to the atelier\n\nCulture. Luxury. Elegance.\nFrom Lagos, for your moment.\n\nMade personal. Worn with confidence.\n\nTHE COLLECTION\n\nShop all pieces\nNew arrivals\nClothing\nJewelry\n\nTHE ATELIER\n\nAbout us\nOur point of view\nContact & assistance\n\nCUSTOMER CARE\n\nFrequently asked questions\nShipping & returns\nYour wishlist\nYour account\nBack to top\nInstagram\nTikTok\nYouTube\nWhatsApp\nD4 Shitta Road, Surulere, Lagos\n\n© 2026 Wearables Atelier\n\nPrivacy\nTerms\nYour Bag\n\nWe couldn’t connect to your bag. Please try again.\n\nWe couldn’t load your bag.\n\nYour item count, prices and availability could not be confirmed. Try again to continue.\n\nTry again\nClose",
+  "bagButtons": [
+    "Try again",
+    "Close",
+    ""
+  ],
+  "overflow": {
+    "innerWidth": 375,
+    "documentWidth": 375
+  }
+}

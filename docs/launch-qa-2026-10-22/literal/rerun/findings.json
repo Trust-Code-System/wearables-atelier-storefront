@@ -1,0 +1,18 @@
+{
+  "persona":"Non-native English speaker; follows literal UI labels",
+  "firstSuccess":false,
+  "result":"Copy/state fixes verified; shopping blocked by external staging API CORS rejection",
+  "baselineIssues":[
+    {"id":"L1","status":"blocked_external","actual":"Landing and shop still cannot load products after retry. Chrome console explicitly reports staging API lacks Access-Control-Allow-Origin for http://127.0.0.1:3001.","evidence":["checks.json","14-guest-shop-outage.png"]},
+    {"id":"L2","status":"fixed","actual":"Shop now says Product availability could not be checked. It does not state zero pieces.","evidence":["14-guest-shop-outage.png","checks.json"]},
+    {"id":"L3","status":"fixed","actual":"Bag dialog now says We couldn’t connect to your bag and states item count, prices and availability could not be confirmed. No raw fetch error, saved claim or zero-item heading. Final header shows em dash, not zero, when unavailable.","evidence":["05-bag.png","14-guest-shop-outage.png","15-final-bag-header.png","final-bag.json"]}
+  ],
+  "additionalPasses":[
+    {"check":"Home grids show explicit failure text, not unexplained empty spaces","evidence":"10-home-explicit-outage.png"},
+    {"check":"Collection retry shows Retrying…","evidence":"11-home-retry-pending.png"},
+    {"check":"Sign-in explains connection failure and offers retry plus guest route","evidence":"12-account-connection.png"},
+    {"check":"Account retry shows Checking your account…","evidence":"13-account-retry-pending.png"},
+    {"check":"Continue as a guest reaches /shop","evidence":"14-guest-shop-outage.png"}
+  ],
+  "limits":"No purchasable products, product selection, add-to-bag or checkout success could be tested. No mocked data, signup, payment or external messaging. 05-bag was captured before final header count update; final header evidence is 14/15."
+}

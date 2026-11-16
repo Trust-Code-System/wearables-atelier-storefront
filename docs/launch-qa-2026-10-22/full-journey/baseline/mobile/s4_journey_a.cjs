@@ -1,0 +1,30 @@
+const {launch,shot,audit,OUT,fs}=require('./lib.cjs');
+(async()=>{
+ const {browser,page,bytes,errs}=await launch();
+ const T0=Date.now();const log=[];
+ const mark=(n,extra)=>{const o={step:n,atSec:((Date.now()-T0)/1000).toFixed(1),bytes:bytes.total,...extra};log.push(o);console.log(JSON.stringify(o));};
+ await page.goto('http://localhost:3101/',{waitUntil:'commit'});
+ // wait until hydrated: cart badge no longer "..." 
+ await page.waitForFunction(()=>{const b=document.querySelector('.store-bag-button');return b&&!/checking/i.test(b.getAttribute('aria-label')||'')},null,{timeout:180000});
+ mark('landing hydrated (bag badge resolved)');
+ await shot(page,'04-a1-landing-hydrated');
+ let s=Date.now();
+ await page.getByRole('link',{name:'Discover the collection'}).first().tap();
+ await page.waitForURL('**/shop',{timeout:120000});
+ mark('tap CTA -> /shop URL',{stepMs:Date.now()-s});
+ await shot(page,'04-a2-shop-just-after-tap');
+ s=Date.now();
+ await page.locator('a[href^="/product/"]').first().waitFor({state:'attached',timeout:180000});
+ mark('shop product links present',{stepMs:Date.now()-s});
+ await shot(page,'04-a3-shop-loaded');
+ await page.locator('a[href^="/product/"]').first().scrollIntoViewIfNeeded();
+ await page.waitForTimeout(1500);
+ await shot(page,'04-a4-shop-grid');
+ const cards=await page.evaluate(()=>[...document.querySelectorAll('a[href^="/product/"]')].map(a=>{const r=a.getBoundingClientRect();return a.getAttribute('href')+' '+Math.round(r.width)+'x'+Math.round(r.height)+' '+a.innerText.replace(/\n/g,' | ').slice(0,80)}));
+ console.log(cards);
+ console.log(JSON.stringify((await audit(page)).small));
+ await page.evaluate(()=>window.scrollBy(0,500));await page.waitForTimeout(800);await shot(page,'04-a5-shop-grid-2');
+ console.log(errs);
+ fs.writeFileSync(OUT+'/s4a.json',JSON.stringify(log,null,1));
+ await browser.close();
+})();

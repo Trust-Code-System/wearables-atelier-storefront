@@ -1,0 +1,61 @@
+{
+  "checkedAt": "2026-10-22T09:34:59.781Z",
+  "rows": [
+    {
+      "origin": "http://127.0.0.1:3001",
+      "endpoint": "/api/v1/store/products?page=1&limit=12",
+      "status": 200,
+      "allowOrigin": null,
+      "allowCredentials": null
+    },
+    {
+      "origin": "http://127.0.0.1:3001",
+      "endpoint": "/api/auth/get-session",
+      "status": 200,
+      "allowOrigin": null,
+      "allowCredentials": null
+    },
+    {
+      "origin": "http://localhost:3100",
+      "endpoint": "/api/v1/store/products?page=1&limit=12",
+      "status": 200,
+      "allowOrigin": null,
+      "allowCredentials": null
+    },
+    {
+      "origin": "http://localhost:3100",
+      "endpoint": "/api/auth/get-session",
+      "status": 200,
+      "allowOrigin": null,
+      "allowCredentials": null
+    },
+    {
+      "origin": "https://wearablesbyashabi.store",
+      "endpoint": "/api/v1/store/products?page=1&limit=12",
+      "status": 200,
+      "allowOrigin": null,
+      "allowCredentials": null
+    },
+    {
+      "origin": "https://wearablesbyashabi.store",
+      "endpoint": "/api/auth/get-session",
+      "status": 200,
+      "allowOrigin": null,
+      "allowCredentials": null
+    },
+    {
+      "origin": "https://storefront.wearables.trustcodesystem.tech",
+      "endpoint": "/api/v1/store/products?page=1&limit=12",
+      "status": 200,
+      "allowOrigin": "https://storefront.wearables.trustcodesystem.tech",
+      "allowCredentials": "true"
+    },
+    {
+      "origin": "https://storefront.wearables.trustcodesystem.tech",
+      "endpoint": "/api/auth/get-session",
+      "status": 200,
+      "allowOrigin": "https://storefront.wearables.trustcodesystem.tech",
+      "allowCredentials": "true"
+    }
+  ]
+}
