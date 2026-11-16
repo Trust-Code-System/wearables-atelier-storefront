@@ -25,7 +25,7 @@ import { BADGE_LABELS, canAddStock, remainingStock, variantStock, variantPrice, 
 import type { Product } from "@/lib/types";
 
 export function ProductClient({ slug, initialProduct }: { slug: string; initialProduct: Product }) {
-  const { products, getProduct, error } = useCatalog();
+  const { products, getProduct, loading, error } = useCatalog();
   const { items, addItem, setOpen, busy, loading: cartLoading } = useCart();
 
   const product = loading ? initialProduct : getProduct(slug);

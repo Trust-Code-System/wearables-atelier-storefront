@@ -72,10 +72,11 @@ test("a refused or failing service is not blamed on the customer, and bag failur
   process.env.NEXT_PUBLIC_API_BASE_URL = "https://api.example.test";
   try {
     globalThis.fetch = async () => Response.json({ statusCode: 403, message: "Forbidden" }, { status: 403 });
-    await assert.rejects(accountAction("sign-in/email", {}), error => !/password/i.test(error.message) && /try again/.test(error.message));
+    await assert.rejects(accountAction("sign-in/email", {}), error => !/password/i.test(error.message) && /check your account before trying again/i.test(error.message));
     await assert.rejects(cartRequest("POST"), error => error.contact === true && /refresh the page/i.test(error.message));
     globalThis.fetch = async () => new Response(null, { status: 503 });
     await assert.rejects(cartRequest("POST"), error => error.contact === true && /review your bag before trying again/i.test(error.message));
+    await assert.rejects(accountAction("sign-up/email", {}), /could not confirm.*check your account before trying again/i);
     globalThis.fetch = async () => Response.json({ code: "INVALID_EMAIL_OR_PASSWORD" }, { status: 401 });
     await assert.rejects(accountAction("sign-in/email", {}), /Check your email and password/);
     globalThis.fetch = async () => new Response(null, { status: 409 });

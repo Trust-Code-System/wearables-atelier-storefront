@@ -23,7 +23,9 @@ export default async function ShopPage({ searchParams }: Props) {
   const sizes = typeof params.sizes === "string" ? params.sizes.split(",").map(Number).filter((size) => (CLOTHING_SIZES as readonly number[]).includes(size)) : [];
   const priceRange = typeof params.price === "string" ? params.price : "all";
   // A failed API keeps the existing retry UI; never invent catalog entries.
-  const initialPage = await loadCatalogPage({ category, sort, sizes, priceRange, page: 1 }).catch(() => null);
+  const query = { category, sizes, priceRange, sort, page: 1 };
+  const result = await loadCatalogPage(query).catch(() => null);
+  const initialPage = result ? { ...result, queryKey: JSON.stringify(query) } : null;
   return (
     <Suspense>
       <ShopClient initialPage={initialPage} />

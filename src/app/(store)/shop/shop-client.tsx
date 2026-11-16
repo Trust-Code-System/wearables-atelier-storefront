@@ -233,7 +233,7 @@ function Filters({
   );
 }
 
-type InitialPage = Awaited<ReturnType<typeof loadCatalogPage>> | null;
+type InitialPage = (Awaited<ReturnType<typeof loadCatalogPage>> & { queryKey: string }) | null;
 
 export function ShopClient({ initialPage }: { initialPage: InitialPage }) {
   const searchParams = useSearchParams();
@@ -332,7 +332,7 @@ function ShopCollection({
     total: number;
     pages: number;
     error: string;
-  }>(() => initialPage ? { key: requestKey, data: initialPage.data, total: initialPage.meta.total, pages: initialPage.meta.totalPages, error: "" } : { key: "", data: [], total: 0, pages: 0, error: "" });
+  }>(() => initialPage?.queryKey === queryKey ? { key: requestKey, data: initialPage.data, total: initialPage.meta.total, pages: initialPage.meta.totalPages, error: "" } : { key: "", data: [], total: 0, pages: 0, error: "" });
   useEffect(() => {
     const controller = new AbortController();
     const query = JSON.parse(queryKey);
