@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { CustomerInformationPage } from "@/components/layout/customer-information-page";
 
-export const metadata: Metadata = {
-  title: "Terms & conditions",
-  description: "The terms that apply when using the Wearables Atelier storefront or placing an order.",
-};
+export const metadata: Metadata = pageMetadata("Terms & Conditions", "The terms that apply when using Wearables by Ashabi or placing an order.", "/terms");
 
 export default function TermsPage() {
   return (

@@ -21,13 +21,14 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
+import type { Product } from "@/lib/types";
 import { canAddStock, remainingStock, variantStock, variantPrice, stockCount, stockLabel } from "@/lib/stock";
 
-export function ProductClient({ slug }: { slug: string }) {
+export function ProductClient({ slug, initialProduct }: { slug: string; initialProduct: Product }) {
   const { products, getProduct, loading, error } = useCatalog();
   const { items, addItem, setOpen, busy, loading: cartLoading } = useCart();
 
-  const product = getProduct(slug);
+  const product = loading ? initialProduct : getProduct(slug);
   const [imageIndex, setImageIndex] = useState(0);
   const [size, setSize] = useState<number | null>(null);
   const [qty, setQtyLocal] = useState(1);
@@ -42,7 +43,7 @@ export function ProductClient({ slug }: { slug: string }) {
       .slice(0, 4);
   }, [products, product]);
 
-  if (loading || error) return <div role="status" className="px-6 py-24 text-center">{error ? "Please retry loading the collection above." : "Loading this piece…"}</div>;
+  if (error) return <div role="status" className="px-6 py-24 text-center">Please retry loading the collection above.</div>;
 
   if (!product) {
     return (

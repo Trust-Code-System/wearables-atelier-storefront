@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "About the atelier",
-  description: "Meet Wearables by Ashabi: Nigerian occasionwear and statement jewelry, brought together in Lagos.",
-};
+export const metadata: Metadata = pageMetadata("About the Atelier", "Meet Wearables by Ashabi: Nigerian occasionwear and statement jewellery, brought together in Lagos.", "/about");
 
 export default function AboutPage() {
   return (
