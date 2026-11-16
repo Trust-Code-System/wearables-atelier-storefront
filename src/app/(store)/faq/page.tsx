@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { CustomerInformationPage } from "@/components/layout/customer-information-page";
 
-export const metadata: Metadata = {
-  title: "Frequently asked questions",
-  description: "Answers about Wearables Atelier orders, sizing, delivery, exchanges and visits.",
-};
+export const metadata: Metadata = pageMetadata("Frequently Asked Questions", "Answers about Wearables by Ashabi orders, sizing, delivery, exchanges and atelier visits.", "/faq");
 
 const questions = [
   {

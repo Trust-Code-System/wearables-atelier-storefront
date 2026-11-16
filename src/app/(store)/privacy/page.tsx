@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { CustomerInformationPage } from "@/components/layout/customer-information-page";
 import { brandContact } from "@/lib/brand-contact";
 
-export const metadata: Metadata = {
-  title: "Privacy",
-  description: "How Wearables Atelier handles information shared through the storefront.",
-};
+export const metadata: Metadata = pageMetadata("Privacy", "How Wearables by Ashabi handles information shared through the storefront.", "/privacy");
 
 export default function PrivacyPage() {
   return (

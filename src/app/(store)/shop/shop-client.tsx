@@ -232,13 +232,16 @@ function Filters({
   );
 }
 
-export function ShopClient() {
+type InitialPage = Awaited<ReturnType<typeof loadCatalogPage>> | null;
+
+export function ShopClient({ initialPage }: { initialPage: InitialPage }) {
   const searchParams = useSearchParams();
   return (
     <ShopCollection
       key={searchParams.toString()}
       categoryParam={searchParams.get("category")}
       sortParam={searchParams.get("sort")}
+      initialPage={initialPage}
     />
   );
 }
@@ -246,9 +249,11 @@ export function ShopClient() {
 function ShopCollection({
   categoryParam,
   sortParam,
+  initialPage,
 }: {
   categoryParam: string | null;
   sortParam: string | null;
+  initialPage: InitialPage;
 }) {
   const initialCategory = (categoryParam ?? "all") as CategoryFilter;
   const [category, setCategory] = useState<CategoryFilter>(
@@ -291,7 +296,7 @@ function ShopCollection({
     total: number;
     pages: number;
     error: string;
-  }>({ key: "", data: [], total: 0, pages: 0, error: "" });
+  }>(() => initialPage ? { key: queryKey, data: initialPage.data, total: initialPage.meta.total, pages: initialPage.meta.totalPages, error: "" } : { key: "", data: [], total: 0, pages: 0, error: "" });
   useEffect(() => {
     const controller = new AbortController();
     const query = JSON.parse(queryKey);
