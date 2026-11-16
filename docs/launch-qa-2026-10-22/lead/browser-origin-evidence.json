@@ -1,0 +1,101 @@
+{
+  "localFailures": [
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session",
+      "error": "net::ERR_FAILED"
+    }
+  ],
+  "localConsole": [
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products?page=1&limit=100' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products?page=1&limit=12&priceRange=all&sort=featured' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED"
+  ],
+  "productionOrigin": "https://wearablesbyashabi.store/shop",
+  "prodConsole": [
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products?page=1&limit=100' from origin 'https://wearablesbyashabi.store' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products?page=1&limit=12&priceRange=all&sort=featured' from origin 'https://wearablesbyashabi.store' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart' from origin 'https://wearablesbyashabi.store' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session' from origin 'https://wearablesbyashabi.store' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart' from origin 'https://wearablesbyashabi.store' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session' from origin 'https://wearablesbyashabi.store' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED"
+  ]
+}

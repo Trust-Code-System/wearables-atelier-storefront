@@ -20,7 +20,9 @@ npm run dev
 
 Open [localhost:3100](http://localhost:3100). The separate admin app runs at [localhost:3200/admin](http://localhost:3200/admin).
 
-Verify with `npm run lint` and `npm run build`. Run the production build locally with `npm run start -- --port 3100`.
+Verify with `npm test`, `npm run lint` and `npm run build`. Run the production build locally with `npm run start -- --port 3100`.
+
+The homepage welcome appears before the storefront on each load. Its jewellery edit uses an original brand photograph while the catalogue loads or has no jewellery products, and shows product cards when available. See the [16 November release verification](docs/release-2026-11-16.md) for the checks and deployment boundaries.
 
 ### Backend configuration
 

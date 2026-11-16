@@ -3,6 +3,7 @@ import { ShopClient } from "./shop-client";
 import type { Metadata } from "next";
 import { loadCatalogPage } from "@/lib/catalog-api";
 import { pageMetadata } from "@/lib/seo";
+import { CLOTHING_SIZES } from "@/lib/products";
 
 type Props = PageProps<"/shop">;
 
@@ -19,8 +20,12 @@ export default async function ShopPage({ searchParams }: Props) {
   const params = await searchParams;
   const category = params.category === "clothing" || params.category === "jewelry" ? params.category : "all";
   const sort = typeof params.sort === "string" && ["newest", "price-asc", "price-desc"].includes(params.sort) ? params.sort : "featured";
+  const sizes = typeof params.sizes === "string" ? params.sizes.split(",").map(Number).filter((size) => (CLOTHING_SIZES as readonly number[]).includes(size)) : [];
+  const priceRange = typeof params.price === "string" ? params.price : "all";
   // A failed API keeps the existing retry UI; never invent catalog entries.
-  const initialPage = await loadCatalogPage({ category, sort, page: 1 }).catch(() => null);
+  const query = { category, sizes, priceRange, sort, page: 1 };
+  const result = await loadCatalogPage(query).catch(() => null);
+  const initialPage = result ? { ...result, queryKey: JSON.stringify(query) } : null;
   return (
     <Suspense>
       <ShopClient initialPage={initialPage} />

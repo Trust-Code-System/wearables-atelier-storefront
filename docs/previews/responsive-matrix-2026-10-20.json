@@ -1,0 +1,512 @@
+[
+  {
+    "h1": "Wear ityour way.",
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/",
+    "width": 320
+  },
+  {
+    "h1": "Wear ityour way.",
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/",
+    "width": 375
+  },
+  {
+    "h1": "Wear ityour way.",
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/",
+    "width": 768
+  },
+  {
+    "h1": "Wear ityour way.",
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/",
+    "width": 1024
+  },
+  {
+    "h1": "Wear ityour way.",
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/",
+    "width": 1440
+  },
+  {
+    "h1": "The Ashabi edit.",
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/shop",
+    "width": 320
+  },
+  {
+    "h1": "The Ashabi edit.",
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/shop",
+    "width": 375
+  },
+  {
+    "h1": "The Ashabi edit.",
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/shop",
+    "width": 768
+  },
+  {
+    "h1": "The Ashabi edit.",
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/shop",
+    "width": 1024
+  },
+  {
+    "h1": "The Ashabi edit.",
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/shop",
+    "width": 1440
+  },
+  {
+    "h1": "Made in Lagos.Worn your way.",
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/about",
+    "width": 320
+  },
+  {
+    "h1": "Made in Lagos.Worn your way.",
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/about",
+    "width": 375
+  },
+  {
+    "h1": "Made in Lagos.Worn your way.",
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/about",
+    "width": 768
+  },
+  {
+    "h1": "Made in Lagos.Worn your way.",
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/about",
+    "width": 1024
+  },
+  {
+    "h1": "Made in Lagos.Worn your way.",
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/about",
+    "width": 1440
+  },
+  {
+    "h1": "Let’s findyour moment.",
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/contact",
+    "width": 320
+  },
+  {
+    "h1": "Let’s findyour moment.",
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/contact",
+    "width": 375
+  },
+  {
+    "h1": "Let’s findyour moment.",
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/contact",
+    "width": 768
+  },
+  {
+    "h1": "Let’s findyour moment.",
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/contact",
+    "width": 1024
+  },
+  {
+    "h1": "Let’s findyour moment.",
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/contact",
+    "width": 1440
+  },
+  {
+    "h1": "A little clarity.A lot more confidence.",
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/faq",
+    "width": 320
+  },
+  {
+    "h1": "A little clarity.A lot more confidence.",
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/faq",
+    "width": 375
+  },
+  {
+    "h1": "A little clarity.A lot more confidence.",
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/faq",
+    "width": 768
+  },
+  {
+    "h1": "A little clarity.A lot more confidence.",
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/faq",
+    "width": 1024
+  },
+  {
+    "h1": "A little clarity.A lot more confidence.",
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/faq",
+    "width": 1440
+  },
+  {
+    "h1": "Delivery with care.Easy exchanges.",
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/shipping-returns",
+    "width": 320
+  },
+  {
+    "h1": "Delivery with care.Easy exchanges.",
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/shipping-returns",
+    "width": 375
+  },
+  {
+    "h1": "Delivery with care.Easy exchanges.",
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/shipping-returns",
+    "width": 768
+  },
+  {
+    "h1": "Delivery with care.Easy exchanges.",
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/shipping-returns",
+    "width": 1024
+  },
+  {
+    "h1": "Delivery with care.Easy exchanges.",
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/shipping-returns",
+    "width": 1440
+  },
+  {
+    "h1": "Privacy,plainly explained.",
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/privacy",
+    "width": 320
+  },
+  {
+    "h1": "Privacy,plainly explained.",
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/privacy",
+    "width": 375
+  },
+  {
+    "h1": "Privacy,plainly explained.",
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/privacy",
+    "width": 768
+  },
+  {
+    "h1": "Privacy,plainly explained.",
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/privacy",
+    "width": 1024
+  },
+  {
+    "h1": "Privacy,plainly explained.",
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/privacy",
+    "width": 1440
+  },
+  {
+    "h1": "Clear terms.Beautiful pieces.",
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/terms",
+    "width": 320
+  },
+  {
+    "h1": "Clear terms.Beautiful pieces.",
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/terms",
+    "width": 375
+  },
+  {
+    "h1": "Clear terms.Beautiful pieces.",
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/terms",
+    "width": 768
+  },
+  {
+    "h1": "Clear terms.Beautiful pieces.",
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/terms",
+    "width": 1024
+  },
+  {
+    "h1": "Clear terms.Beautiful pieces.",
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/terms",
+    "width": 1440
+  },
+  {
+    "h1": "Keep a littlesomething you love.",
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/wishlist",
+    "width": 320
+  },
+  {
+    "h1": "Keep a littlesomething you love.",
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/wishlist",
+    "width": 375
+  },
+  {
+    "h1": "Keep a littlesomething you love.",
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/wishlist",
+    "width": 768
+  },
+  {
+    "h1": "Keep a littlesomething you love.",
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/wishlist",
+    "width": 1024
+  },
+  {
+    "h1": "Keep a littlesomething you love.",
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/wishlist",
+    "width": 1440
+  },
+  {
+    "h1": "A little moreyou.",
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/account",
+    "width": 320
+  },
+  {
+    "h1": "A little moreyou.",
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/account",
+    "width": 375
+  },
+  {
+    "h1": "A little moreyou.",
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/account",
+    "width": 768
+  },
+  {
+    "h1": "A little moreyou.",
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/account",
+    "width": 1024
+  },
+  {
+    "h1": "A little moreyou.",
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/account",
+    "width": 1440
+  },
+  {
+    "h1": "Welcomeback.",
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/account/login",
+    "width": 320
+  },
+  {
+    "h1": "Welcomeback.",
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/account/login",
+    "width": 375
+  },
+  {
+    "h1": "Welcomeback.",
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/account/login",
+    "width": 768
+  },
+  {
+    "h1": "Welcomeback.",
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/account/login",
+    "width": 1024
+  },
+  {
+    "h1": "Welcomeback.",
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/account/login",
+    "width": 1440
+  },
+  {
+    "h1": "A little moreyou.",
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/account/register",
+    "width": 320
+  },
+  {
+    "h1": "A little moreyou.",
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/account/register",
+    "width": 375
+  },
+  {
+    "h1": "A little moreyou.",
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/account/register",
+    "width": 768
+  },
+  {
+    "h1": "A little moreyou.",
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/account/register",
+    "width": 1024
+  },
+  {
+    "h1": "A little moreyou.",
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/account/register",
+    "width": 1440
+  },
+  {
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/checkout",
+    "width": 320
+  },
+  {
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/checkout",
+    "width": 375
+  },
+  {
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/checkout",
+    "width": 768
+  },
+  {
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/checkout",
+    "width": 1024
+  },
+  {
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/checkout",
+    "width": 1440
+  },
+  {
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/product/test-product",
+    "width": 320
+  },
+  {
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/product/test-product",
+    "width": 375
+  },
+  {
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/product/test-product",
+    "width": 768
+  },
+  {
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/product/test-product",
+    "width": 1024
+  },
+  {
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/product/test-product",
+    "width": 1440
+  },
+  {
+    "overflow": false,
+    "pageWidth": 310,
+    "path": "/checkout?populated",
+    "width": 320
+  },
+  {
+    "overflow": false,
+    "pageWidth": 365,
+    "path": "/checkout?populated",
+    "width": 375
+  },
+  {
+    "overflow": false,
+    "pageWidth": 758,
+    "path": "/checkout?populated",
+    "width": 768
+  },
+  {
+    "overflow": false,
+    "pageWidth": 1014,
+    "path": "/checkout?populated",
+    "width": 1024
+  },
+  {
+    "overflow": false,
+    "pageWidth": 1430,
+    "path": "/checkout?populated",
+    "width": 1440
+  }
+]

@@ -1,0 +1,3 @@
+/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-unused-vars -- Standalone browser QA evidence scripts. */
+const {chromium}=require('C:/Users/Admin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+(async()=>{const b=await chromium.launch({channel:'chrome',headless:true});const p=await b.newPage({viewport:{width:1440,height:1000}});await p.goto('http://127.0.0.1:3001',{waitUntil:'networkidle'});await p.screenshot({path:'docs/launch-qa-2026-10-22/skeptic/00-landing.png',fullPage:true});console.log(await p.locator('body').innerText());console.log('LINKS',await p.locator('a').evaluateAll(els=>els.map(e=>({text:e.innerText,href:e.getAttribute('href')}))));await b.close();})();

@@ -1,0 +1,145 @@
+{
+  "marks": {
+    "commit": 593,
+    "dcl": 6231,
+    "firstTappable": 16057,
+    "load": 37992,
+    "networkidle": 38087
+  },
+  "bytes": 1733244,
+  "byType": {
+    "Document": 10800,
+    "Stylesheet": 28407,
+    "Font": 239213,
+    "Script": 1250863,
+    "Image": 203961
+  },
+  "top": [
+    {
+      "url": "/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jmam7qwg.js",
+      "type": "Script",
+      "status": 200,
+      "bytes": 255027
+    },
+    {
+      "url": "/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js",
+      "type": "Script",
+      "status": 200,
+      "bytes": 197377
+    },
+    {
+      "url": "/_next/static/chunks/1daa_next_dist_compiled_react-dom_cjs_react-dom-client_development_0mp0cp_t-ezj9.js",
+      "type": "Script",
+      "status": 200,
+      "bytes": 182799
+    },
+    {
+      "url": "/_next/static/chunks/node_modules_%40base-ui_react_1fjv5s52sp_dw._.js",
+      "type": "Script",
+      "status": 200,
+      "bytes": 123515
+    },
+    {
+      "url": "/_next/static/chunks/node_modules_motion-dom_dist_es_0z8-g_wl8h99b._.js",
+      "type": "Script",
+      "status": 200,
+      "bytes": 104248
+    },
+    {
+      "url": "/_next/static/media/1bffadaabf893a1e-s.3-6t-g6q0vh0a.woff2",
+      "type": "Font",
+      "status": 200,
+      "bytes": 85573
+    },
+    {
+      "url": "/_next/static/chunks/node_modules_0f0on3t6f50t8._.js",
+      "type": "Script",
+      "status": 200,
+      "bytes": 64236
+    },
+    {
+      "url": "/_next/image?url=%2Fcollection%2Flook-03.png&w=750&q=75",
+      "type": "Image",
+      "status": 200,
+      "bytes": 61696
+    },
+    {
+      "url": "/_next/static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2",
+      "type": "Font",
+      "status": 200,
+      "bytes": 48732
+    },
+    {
+      "url": "/_next/static/chunks/node_modules_1_82eo6a-w73i._.js",
+      "type": "Script",
+      "status": 200,
+      "bytes": 47005
+    },
+    {
+      "url": "/_next/image?url=%2Fcollection%2Flook-01.png&w=750&q=75",
+      "type": "Image",
+      "status": 200,
+      "bytes": 47002
+    },
+    {
+      "url": "/_next/image?url=%2Fcollection%2Flook-02.png&w=750&q=75",
+      "type": "Image",
+      "status": 200,
+      "bytes": 44760
+    },
+    {
+      "url": "/_next/static/chunks/node_modules_framer-motion_dist_es_1czu9gr8qzt8z._.js",
+      "type": "Script",
+      "status": 200,
+      "bytes": 43721
+    },
+    {
+      "url": "/_next/image?url=%2Fcollection%2Flook-10.png&w=750&q=75",
+      "type": "Image",
+      "status": 200,
+      "bytes": 40102
+    },
+    {
+      "url": "/_next/static/chunks/node_modules_next_dist_05y3oi5z9mc_3._.js",
+      "type": "Script",
+      "status": 200,
+      "bytes": 35577
+    }
+  ],
+  "audit": {
+    "vw": 375,
+    "docW": 375,
+    "hscroll": false,
+    "small": [],
+    "tinyText": [
+      {
+        "t": "Delivery options at checkout",
+        "fs": 9
+      },
+      {
+        "t": "The Ashabi edit",
+        "fs": 8
+      },
+      {
+        "t": "From Lagos. For your moment.",
+        "fs": 8
+      },
+      {
+        "t": "There’s more to discover",
+        "fs": 8
+      },
+      {
+        "t": "01 — 26",
+        "fs": 8
+      }
+    ],
+    "scrollH": 5086
+  },
+  "errs": {
+    "console": [],
+    "page": [],
+    "failed": [],
+    "http": []
+  },
+  "nreq": 39
+}

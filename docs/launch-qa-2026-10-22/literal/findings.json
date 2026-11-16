@@ -1,0 +1,13 @@
+{
+  "persona": "Non-native English speaker; follows literal UI labels",
+  "baseline": "2026-10-22",
+  "firstSuccess": false,
+  "blockedAt": "Discover the collection → /shop: collection unavailable after one Retry",
+  "findings": [
+    {"id":"L1","severity":"P0","title":"Cannot reach a purchasable product","steps":["Open landing page","Read collection temporarily unavailable","Click Retry collection once","Click Discover the collection","Click Retry once"],"actual":"Collection stays temporarily unavailable; product and checkout journey cannot proceed.","screenshots":["baseline/02-collection-retry.png","baseline/04-shop-retry.png"]},
+    {"id":"L2","severity":"P1","title":"Shop says zero pieces when it cannot load the collection","steps":["Click Discover the collection","Read count above filters","Read collection error below"],"actual":"0 pieces to discover and collection temporarily unavailable present competing literal states. I read zero as nothing available to buy.","expected":"Say collection unavailable, and do not state a known inventory count until loaded.","screenshots":["baseline/04-shop-retry.png"]},
+    {"id":"L3","severity":"P1","title":"Bag error uses technical words and promises a saved bag","steps":["On shop page click Bag","Read all bag messages"],"actual":"Your Bag (0 items), Failed to fetchRetry, and Your bag is safely saved appear together. I do not know what fetch means or whether this is an empty/saved/unavailable bag.","expected":"One clear unavailable state with a plain retry action; no unverified saved claim or zero item count.","screenshots":["baseline/05-bag.png"]}
+  ],
+  "additionalChecks": ["Your account correctly explains account check unavailable and offers Try again/Back to sign in. Retried once.","Back to sign in opens labelled sign in form.","Create an account link opens Full name, Email address, Password fields; password help says at least 12 characters. No real signup submitted.","Editorial headings were understandable as decorative copy; not filed as confusion without actual navigation impact."],
+  "limitations": "Backend unavailable during baseline. No product, add-to-bag, checkout or purchase first success was achieved. No real signup or external message sent."
+}

@@ -11,7 +11,7 @@ export default function TermsPage() {
       title="Clear terms."
       accent="Beautiful pieces."
       introduction="These terms apply when you use this storefront or place an order with Wearables Atelier."
-      updated="12 October 2026"
+      updated="22 October 2026"
     >
       <section className="information-section">
         <span>01</span>
@@ -41,7 +41,8 @@ export default function TermsPage() {
         <div>
           <h2>Prices and payment</h2>
           <p>
-            Prices are shown in the selected display currency. The checkout total includes
+            Prices are shown in the selected display currency. USD is an estimate for
+            browsing; checkout and payment use Nigerian naira (NGN). The checkout total includes
             the products and any applicable delivery charge shown before you confirm the
             order. Your payment provider may apply its own currency conversion or bank fees.
           </p>

@@ -1,0 +1,34 @@
+const {launch,shot,audit,OUT,fs}=require('./lib.cjs');const mock=require('./mock.cjs');const {withKeyboard}=require('./helpers.cjs');
+(async()=>{
+ const {browser,page,bytes,errs}=await launch();
+ const T0=Date.now();const mark=(n,e)=>console.log(JSON.stringify({step:n,atSec:((Date.now()-T0)/1000).toFixed(1),bytes:bytes.total,...e}));
+ await mock(page);
+ page.on('request',r=>{if(/api-proxy/.test(r.url())&&r.method()!=='GET')console.log('  REQ',r.method(),r.url().slice(-60),(r.postData()||'').slice(0,200))});
+ page.on('response',async r=>{if(/api-proxy/.test(r.url())&&(r.status()>=400||r.request().method()!=='GET'))console.log('  RES',r.status(),r.url().slice(-80),(await r.text().catch(()=>'')).slice(0,200))});
+ await page.goto('http://localhost:3101/product/test-product',{waitUntil:'commit'});
+ await page.getByRole('radio',{name:'6'}).waitFor({timeout:180000});
+ await page.waitForFunction(()=>{const b=document.querySelector('.store-bag-button');return b&&!/checking/i.test(b.getAttribute('aria-label')||'')},null,{timeout:180000});
+ await page.getByRole('radio',{name:'6'}).tap();
+ await page.getByRole('button',{name:/add to bag/i}).first().tap();
+ await page.getByText('Your Bag').first().waitFor({timeout:60000});await page.waitForTimeout(800);
+ await page.getByRole('button',{name:/^Checkout/}).first().tap();
+ await page.waitForURL('**/checkout**',{timeout:120000});
+ const name=page.locator('input[autocomplete=name]');
+ await name.waitFor({timeout:120000});
+ mark('checkout form visible');
+ // tap Continue with empty form first
+ let s=Date.now();
+ await page.getByRole('button',{name:/continue to delivery/i}).tap();await page.waitForTimeout(1200);await shot(page,'10-contact-empty-submit');
+ console.log('errors:',await page.evaluate(()=>[...document.querySelectorAll('[role=alert],.error,[aria-invalid=true]')].map(e=>e.innerText||e.getAttribute('aria-label')||e.name)));
+ console.log('name',JSON.stringify(await withKeyboard(page,name,'QA Tester','10-kb-name')));
+ console.log('email',JSON.stringify(await withKeyboard(page,page.locator('input[type=email]'),`qa-mobile-${Math.floor(Date.now()/1000)}@example.com`,'10-kb-email')));
+ console.log('phone',JSON.stringify(await withKeyboard(page,page.locator('input[type=tel]'),'+2348000000000','10-kb-phone')));
+ await page.getByRole('button',{name:/continue to delivery/i}).scrollIntoViewIfNeeded();
+ s=Date.now();await page.getByRole('button',{name:/continue to delivery/i}).tap();
+ mark('tapped continue');
+ await page.waitForTimeout(1000);await shot(page,'10-after-continue-t1');
+ await page.waitForTimeout(6000);await shot(page,'10-after-continue-t7');
+ console.log('inputs now:',await page.evaluate(()=>[...document.querySelectorAll('input,select,textarea,[role=combobox],[role=radio]')].filter(e=>e.getBoundingClientRect().width>0).map(e=>e.tagName+' type='+e.type+' ac='+e.autocomplete+' im='+e.inputMode+' "'+(e.getAttribute('aria-label')||e.placeholder||e.name||e.value)+'" '+Math.round(e.getBoundingClientRect().width)+'x'+Math.round(e.getBoundingClientRect().height)+' y'+Math.round(e.getBoundingClientRect().top+scrollY))));
+ console.log((await page.evaluate(()=>document.body.innerText)).slice(0,700));
+ await browser.close();
+})();

@@ -59,7 +59,7 @@ function AuthFields({ mode, keyboard }: { mode: Mode; keyboard: boolean }) {
   const [visible, setVisible] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
   const router = useRouter();
-  const { session, loading: checking } = useAccountSession();
+  const { session, loading: checking, error: sessionError, refresh: retrySession } = useAccountSession();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   useEffect(() => {
@@ -78,7 +78,7 @@ function AuthFields({ mode, keyboard }: { mode: Mode; keyboard: boolean }) {
       next.name = "Tell us your name, using at least 2 characters.";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim()))
       next.email = "Enter a valid email address.";
-    if (!fields.password) next.password = "Enter your password.";
+    if (!fields.password) next.password = register ? "Create a password with at least 12 characters." : "Enter your password.";
     else if (register && fields.password.length < 12)
       next.password = "Use at least 12 characters.";
     setErrors(next);
@@ -175,6 +175,11 @@ function AuthFields({ mode, keyboard }: { mode: Mode; keyboard: boolean }) {
             : "Your favourite pieces. Your next occasion. All a little closer."}
         </p>
       </div>
+
+      {sessionError && <div className="auth-session-problem" role="status">
+        <p>{sessionError} You can also continue as a guest below.</p>
+        <button type="button" className="auth-forgot" onClick={retrySession}>Retry account connection</button>
+      </div>}
 
       <form
         ref={formRef}
@@ -329,6 +334,7 @@ function AuthFields({ mode, keyboard }: { mode: Mode; keyboard: boolean }) {
         <p role="status" className="auth-account-message">
           {message}
         </p>
+        {(!register || message) && (
         <button
           type="button"
           className="auth-forgot"
@@ -337,20 +343,21 @@ function AuthFields({ mode, keyboard }: { mode: Mode; keyboard: boolean }) {
             void resend();
           }}
         >
-          Resend verification email
+          Send the verification email again
         </button>
+        )}
       </form>
 
       <div className="auth-preview-note" id="auth-account-note">
         <Info size={15} aria-hidden />
         <p>
           Your favourites, orders and delivery details, together in your
-          account. Your password is never saved in browser storage.
+          account. We never store your password in your browser.
         </p>
       </div>
       <div className="auth-guest-divider">
         <span />
-        Or, make yourself at home
+        Or shop without an account
         <span />
       </div>
       <Link href="/shop" className="auth-guest">

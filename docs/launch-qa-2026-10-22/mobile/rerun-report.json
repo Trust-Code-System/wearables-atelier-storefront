@@ -1,0 +1,125 @@
+{
+  "persona": "mobile",
+  "mode": "rerun",
+  "viewport": "375x812",
+  "network": {
+    "latencyMs": 400,
+    "downloadKbps": 500,
+    "uploadKbps": 500
+  },
+  "started": "2026-10-22T09:33:20.404Z",
+  "steps": [
+    {
+      "label": "landing",
+      "url": "http://127.0.0.1:3001/",
+      "body": "Skip to content\nDelivery options at checkout\n0\nTHE ASHABI EDIT\n\nFROM LAGOS. FOR YOUR MOMENT.\n\nWear it\nyour way.\n\nRich colour. Statement silhouettes.\nNigerian elegance, made personal.\n\nDiscover the collection\nThere’s more to discover\n01 — 26\nNew arrivals\nClothing\nJewelry\n\nTHE ASHABI COLLECTION\n\nMade for your moment.\nShop all pieces\n\nLoading products…\n\nREADY TO WEAR\n\nMAKE ROOM IN YOUR WARDROBE\n\nLife, well dressed.\nTHE FINISHING TOUCH\n\nA LITTLE SOMETHING, EVERY DAY\n\nAll in the details.\n\nTHE JEWELRY EDIT\n\nSmall details.\nBig feeling.\n\nStatement necklaces. Coordinated earrings. The finishing touches that bring your occasion look together.\n\nExplore jewelry\n\nLoading jewelry…\n\nTHE WEARABLES POINT OF VIEW\n\nStyle is personal.\nKeep it that way.\n\nWe believe the best things in your wardrobe feel like you. The right cut. An unexpected detail. A piece of jewelry that becomes part of your story.\n\nIro & Buba, occasionwear and statement jewellery, brought together with a little more intention. From Lagos, for wherever the day takes you.\n\nFind your everyday\nWearables Atelier\n01\n\nDelivered to your door\nAvailable delivery methods and fees shown at checkout\n\n02\n\nFind your fit\nNumbered clothing sizes. Clear product details.\n\n03\n\nHere to help\nTalk to the atelier\n\nA LITTLE MORE YOU.\n\nYou bring the occasion.\nWe’ll bring the style.\n\nFinding your fit. Finishing your look.\nLet’s find something that feels like you.\n\nTalk to the atelier\n\nCulture. Luxury. Elegance.\nFrom Lagos, for your moment.\n\nMade personal. Worn with confidence.\n\nTHE COLLECTION\n\nShop all pieces\nNew arrivals\nClothing\nJewelry\n\nTHE ATELIER\n\nAbout us\nOur point of view\nContact & assistance\n\nCUSTOMER CARE\n\nFrequently asked questions\nShipping & returns\nYour wishlist\nYour account\nBack to top\nInstagram\nTikTok\nYouTube\nWhatsApp\nD4 Shitta Road, Surulere, Lagos\n\n© 2026 Wearables Atelier\n\nPrivacy\nTerms",
+      "viewport": 375,
+      "documentWidth": 375,
+      "smallTargets": []
+    },
+    {
+      "label": "shop",
+      "url": "http://127.0.0.1:3001/shop",
+      "body": "Skip to content\nDelivery options at checkout\n0\n\nThe collection is temporarily unavailable. Please try again.\n\nRetry\nContact us for help\n\nWEARABLES ATELIER / THE COLLECTION\n\nThe Ashabi edit.\n\nNigerian occasionwear and statement jewellery. Culture, luxury and elegance, brought together.\n\nFrom Lagos.\nFor your moment.\n\nOccasionwear & statement jewellery\n\nProduct availability could not be checked\n\nFilters\nFeatured\n\nA LITTLE MORE YOU.\n\nYou bring the occasion.\nWe’ll bring the style.\n\nFinding your fit. Finishing your look.\nLet’s find something that feels like you.\n\nTalk to the atelier\n\nCulture. Luxury. Elegance.\nFrom Lagos, for your moment.\n\nMade personal. Worn with confidence.\n\nTHE COLLECTION\n\nShop all pieces\nNew arrivals\nClothing\nJewelry\n\nTHE ATELIER\n\nAbout us\nOur point of view\nContact & assistance\n\nCUSTOMER CARE\n\nFrequently asked questions\nShipping & returns\nYour wishlist\nYour account\nBack to top\nInstagram\nTikTok\nYouTube\nWhatsApp\nD4 Shitta Road, Surulere, Lagos\n\n© 2026 Wearables Atelier\n\nPrivacy\nTerms",
+      "viewport": 375,
+      "documentWidth": 375,
+      "smallTargets": [
+        {
+          "text": null,
+          "width": 1,
+          "height": 1
+        }
+      ]
+    },
+    {
+      "label": "shop-retry",
+      "url": "http://127.0.0.1:3001/shop",
+      "body": "Skip to content\nDelivery options at checkout\n0\n\nThe collection is temporarily unavailable. Please try again.\n\nRetry\nContact us for help\n\nWEARABLES ATELIER / THE COLLECTION\n\nThe Ashabi edit.\n\nNigerian occasionwear and statement jewellery. Culture, luxury and elegance, brought together.\n\nFrom Lagos.\nFor your moment.\n\nOccasionwear & statement jewellery\n\nProduct availability could not be checked\n\nFilters\nFeatured\n\nA LITTLE MORE YOU.\n\nYou bring the occasion.\nWe’ll bring the style.\n\nFinding your fit. Finishing your look.\nLet’s find something that feels like you.\n\nTalk to the atelier\n\nCulture. Luxury. Elegance.\nFrom Lagos, for your moment.\n\nMade personal. Worn with confidence.\n\nTHE COLLECTION\n\nShop all pieces\nNew arrivals\nClothing\nJewelry\n\nTHE ATELIER\n\nAbout us\nOur point of view\nContact & assistance\n\nCUSTOMER CARE\n\nFrequently asked questions\nShipping & returns\nYour wishlist\nYour account\nBack to top\nInstagram\nTikTok\nYouTube\nWhatsApp\nD4 Shitta Road, Surulere, Lagos\n\n© 2026 Wearables Atelier\n\nPrivacy\nTerms",
+      "viewport": 375,
+      "documentWidth": 375,
+      "smallTargets": [
+        {
+          "text": null,
+          "width": 1,
+          "height": 1
+        }
+      ]
+    }
+  ],
+  "issues": [
+    {
+      "id": "shop-no-products",
+      "severity": "P0",
+      "message": "Shop contains no product links; customer cannot pick a product, add to bag or reach checkout."
+    }
+  ],
+  "console": [
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products?page=1&limit=100' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products?page=1&limit=12&priceRange=all&sort=featured' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED",
+    "Access to fetch at 'https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products?page=1&limit=12&priceRange=all&sort=featured' from origin 'http://127.0.0.1:3001' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+    "Failed to load resource: net::ERR_FAILED"
+  ],
+  "networkErrors": [
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products?page=1&limit=100",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products?page=1&limit=12&priceRange=all&sort=featured",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products?page=1&limit=100",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products?page=1&limit=12&priceRange=all&sort=featured",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/auth/get-session",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/cart",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "url": "https://api.staging.wearables.trustcodesystem.tech/api/v1/store/products?page=1&limit=12&priceRange=all&sort=featured",
+      "error": "net::ERR_FAILED"
+    }
+  ],
+  "landingDomContentLoadedMs": 7974,
+  "shopElapsedMs": 29964,
+  "result": "blocked-before-first-success"
+}

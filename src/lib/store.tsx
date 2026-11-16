@@ -14,7 +14,8 @@ import {
 import type { CartItem, Currency, Order, Product } from "@/lib/types";
 import { usePathname } from "next/navigation";
 import { loadCatalog } from "@/lib/catalog-api";
-import { cartItems, cartNaira, cartRequest, CartQueue, type SavedCart } from "@/lib/cart-api";
+import { cartItems, cartNaira, cartRequest, CartError, CartQueue, type SavedCart } from "@/lib/cart-api";
+import { brandContact } from "@/lib/brand-contact";
 import { toast } from "sonner";
 import { WishlistSync, initialWishlist, type WishlistState } from "./wishlist-sync";
 import { accountSession } from "./account-api";
@@ -178,7 +179,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
       } catch {
         if (controller.signal.aborted || current !== request) return;
         setProducts([]);
-        setError("The collection is temporarily unavailable. Please try again.");
+        setError("We could not load the products. Please try again.");
       } finally {
         if (!controller.signal.aborted && current === request) setLoading(false);
       }
@@ -216,7 +217,7 @@ export function CatalogNotice() {
   // The shop owns its own error state; informational and account routes don't
   // depend on the catalog. Keep the warning beside the content it affects.
   if (!error || !(pathname === "/" || pathname.startsWith("/product/"))) return null;
-  return <div role="alert" className="store-catalog-notice"><p>{error}</p><button type="button" disabled={loading} onClick={refresh}>{loading ? "Retrying…" : "Retry collection"}</button></div>;
+  return <div role="alert" className="store-catalog-notice"><p>{error}</p><button type="button" disabled={loading} onClick={refresh}>{loading ? "Retrying…" : "Try again"}</button></div>;
 }
 
 /* ------------------------------------------------------------------ */
@@ -296,12 +297,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setError("");
         return true;
       } catch (cause) {
-        const message = cause instanceof Error ? cause.message : "Unable to load your bag. Please try again.";
-        setError(message);
-        if (notify) toast.error(message);
+        const message = cause instanceof Error ? cause.message : "We could not load your bag. Please try again.";
+        if (notify) {
+          toast.error(message, cause instanceof CartError && cause.contact
+            ? { action: { label: "Message us", onClick: () => window.open(brandContact.whatsapp, "_blank", "noopener,noreferrer") } }
+            : undefined);
+        }
         // A response may have been lost after a committed mutation. Reconcile,
         // but never retry an additive action automatically.
-        try { setCart(await cartRequest()); } catch { /* Keep error and last confirmed snapshot. */ }
+        try {
+          setCart(await cartRequest());
+          // The bag is confirmed again, so the toast is the only message needed;
+          // a lingering error would hide a perfectly good bag behind "couldn't load".
+          setError("");
+        } catch {
+          setError(message); // Keep the error and the last confirmed snapshot.
+        }
         return false;
       } finally {
         setLoading(false);

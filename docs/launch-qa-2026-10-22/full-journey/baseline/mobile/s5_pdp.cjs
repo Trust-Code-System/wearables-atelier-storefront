@@ -1,0 +1,25 @@
+const {launch,shot,audit,OUT,fs}=require('./lib.cjs');
+(async()=>{
+ const {browser,page,bytes,errs}=await launch();
+ const T0=Date.now();
+ const mark=(n,e)=>console.log(JSON.stringify({step:n,atSec:((Date.now()-T0)/1000).toFixed(1),bytes:bytes.total,...e}));
+ await page.goto('http://localhost:3101/shop',{waitUntil:'commit'});
+ await page.locator('a[href^="/product/"]').first().waitFor({state:'attached',timeout:180000});
+ mark('shop ready');
+ let s=Date.now();
+ const link=page.locator('a[href="/product/test-product"]').last();
+ await link.scrollIntoViewIfNeeded();
+ await link.tap();
+ await page.waitForURL('**/product/test-product',{timeout:120000});
+ mark('PDP url',{stepMs:Date.now()-s});
+ await shot(page,'05-pdp-immediate');
+ await page.waitForTimeout(8000);await shot(page,'05-pdp-t8');
+ await page.waitForLoadState('networkidle',{timeout:120000}).catch(()=>{});
+ mark('PDP idle',{stepMs:Date.now()-s});
+ await shot(page,'05-pdp-top');
+ console.log('scrollH',await page.evaluate(()=>document.documentElement.scrollHeight));
+ console.log(await page.evaluate(()=>[...document.querySelectorAll('button,a,select,input,[role=radio],[role=combobox]')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.height>0}).map(e=>e.tagName+' '+(e.getAttribute('role')||'')+' "'+(e.innerText||e.getAttribute('aria-label')||e.getAttribute('placeholder')||'').replace(/\n/g,' ').trim().slice(0,40)+'" '+Math.round(e.getBoundingClientRect().width)+'x'+Math.round(e.getBoundingClientRect().height)+' y'+Math.round(e.getBoundingClientRect().top+scrollY)).join('\n')));
+ console.log(await page.evaluate(()=>document.body.innerText.slice(0,1500)));
+ console.log(JSON.stringify(errs.console),JSON.stringify(errs.page));
+ await browser.close();
+})();

@@ -1,10 +1,11 @@
 "use client";
 
-import Image from "next/image";
+import { SafeImage as Image } from "@/components/ui/safe-image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { MinusIcon, PlusIcon, ShoppingBagIcon, Trash2Icon } from "lucide-react";
 import { useCart, useCurrency } from "@/lib/store";
+import { brandContact } from "@/lib/brand-contact";
 import { formatPrice } from "@/lib/format";
 import {
   Sheet,
@@ -42,15 +43,14 @@ export function CartDrawer() {
         <SheetHeader className="border-b px-5 py-4">
           <SheetTitle className="font-display text-lg">
             Your Bag{" "}
-            <span className="text-sm font-normal text-muted-foreground tabular-nums">
+            {!loading && !error && <span className="text-sm font-normal text-muted-foreground tabular-nums">
               ({count} {count === 1 ? "item" : "items"})
-            </span>
+            </span>}
           </SheetTitle>
         </SheetHeader>
 
         {(loading || error) && <div className="border-b px-5 py-3 text-sm" role={error ? "alert" : "status"}>
-          {loading ? "Loading your bag…" : error}
-          {error && <button type="button" className="ml-2 underline" disabled={busy} onClick={() => { void refresh(); }}>Retry</button>}
+          <p>{loading || busy ? "Checking your bag…" : error}</p>
         </div>}
         {!loading && !error && items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
@@ -60,7 +60,7 @@ export function CartDrawer() {
             <div className="flex flex-col gap-1">
               <p className="font-display text-lg">Your bag is empty</p>
               <p className="text-sm text-muted-foreground">
-                Beautiful things are waiting on the other side.
+                Choose a product to start your order.
               </p>
             </div>
             <Button
@@ -68,22 +68,23 @@ export function CartDrawer() {
               onClick={() => setOpen(false)}
               render={<Link href="/shop" />}
             >
-              Browse the collection
+              Shop all products
             </Button>
           </div>
         ) : loading || error ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center" role="status">
             <ShoppingBagIcon className="size-8 text-muted-foreground" aria-hidden />
-            <h2 className="font-display text-lg">{loading ? "Checking your pieces…" : "Your bag is safely saved."}</h2>
-            <p className="text-sm text-muted-foreground">{loading ? "We’re confirming current prices and availability." : "We couldn’t check prices and availability. Try again to continue."}</p>
-            {error && <Button variant="outline" disabled={loading} onClick={refresh}>{loading ? "Retrying…" : "Try again"}</Button>}
+            <h2 className="font-display text-lg">{loading || busy ? "Checking your bag…" : "We couldn’t load your bag."}</h2>
+            <p className="text-sm text-muted-foreground">{loading || busy ? "We’re confirming current prices and availability." : "We could not check your items, prices or stock. Try again, or message us if this keeps happening."}</p>
+            {error && <Button variant="outline" disabled={loading || busy} onClick={() => { void refresh(); }}>{busy ? "Retrying…" : "Try again"}</Button>}
+            {error && <a className="text-sm underline underline-offset-4" href={brandContact.whatsapp} target="_blank" rel="noopener noreferrer">Message us on WhatsApp</a>}
           </div>
         ) : (
           <>
             <p className="border-b px-5 py-3 text-xs text-muted-foreground">Delivery options and charges are confirmed at checkout.</p>
 
             <div className="flex-1 overflow-y-auto px-5">
-              {items.filter((item) => !item.product).map((item) => <div key={`${item.productId}-${item.size}`} className="border-b py-4 text-sm"><p>This piece is no longer in the collection.</p><button type="button" className="underline" disabled={busy} onClick={() => removeItem(item.productId, item.size)}>Remove unavailable piece</button></div>)}
+              {items.filter((item) => !item.product).map((item) => <div key={`${item.productId}-${item.size}`} className="border-b py-4 text-sm"><p>This item is no longer available.</p><button type="button" className="underline" disabled={busy} onClick={() => removeItem(item.productId, item.size)}>Remove this item</button></div>)}
               <AnimatePresence initial={false}>
                 {lines.map((line) => (
                   <motion.div
@@ -133,7 +134,7 @@ export function CartDrawer() {
                           disabled={busy}
                           aria-label={`Remove ${line.product.name}`}
                           onClick={() => removeItem(line.productId, line.size)}
-                          className="text-muted-foreground transition-all duration-150 ease-out hover:text-destructive active:scale-90"
+                          className="-m-2 grid size-11 place-items-center text-muted-foreground transition-all duration-150 ease-out hover:text-destructive active:scale-90"
                         >
                           <Trash2Icon className="size-4" />
                         </button>
@@ -146,11 +147,11 @@ export function CartDrawer() {
                             disabled={busy}
                             aria-label="Decrease quantity"
                             onClick={() => setQty(line.productId, line.size, line.qty - 1)}
-                            className="grid size-7 place-items-center transition-all duration-150 ease-out hover:bg-muted active:scale-90"
+                            className="grid size-11 place-items-center sm:size-8 transition-all duration-150 ease-out hover:bg-muted active:scale-90"
                           >
                             <MinusIcon className="size-3.5" />
                           </button>
-                          <span className="w-7 text-center text-[0.8125rem] tabular-nums">
+                          <span className="w-8 text-center text-sm tabular-nums">
                             {line.qty}
                           </span>
                           <button
@@ -158,7 +159,7 @@ export function CartDrawer() {
                             aria-label="Increase quantity"
                             disabled={busy || !canAddStock(items, line.product, 1, line.size)}
                             onClick={() => setQty(line.productId, line.size, line.qty + 1)}
-                            className="grid size-7 place-items-center transition-all duration-150 ease-out hover:bg-muted active:scale-90"
+                            className="grid size-11 place-items-center sm:size-8 transition-all duration-150 ease-out hover:bg-muted active:scale-90"
                           >
                             <PlusIcon className="size-3.5" />
                           </button>
@@ -185,9 +186,9 @@ export function CartDrawer() {
               <p className="text-[0.75rem] text-muted-foreground">
                 Delivery calculated at checkout. Taxes included.
               </p>
-              {stockIssues || loading || busy || error ? <><p role="status" className="text-sm text-muted-foreground">{error ? "Refresh your bag before continuing." : loading || busy ? "Updating your bag…" : "Remove unavailable pieces or adjust quantities before checkout."}</p><Button size="lg" disabled className="w-full">Update your bag to continue</Button></> : <Button
+              {stockIssues || loading || busy || error ? <><p role="status" className="text-sm text-muted-foreground">{error ? "Refresh your bag before continuing." : loading || busy ? "Updating your bag…" : "Remove unavailable items or change quantities before checkout."}</p><Button size="lg" disabled className="w-full">Update your bag to continue</Button></> : <Button
                 size="lg"
-                className="w-full transition-transform duration-150 ease-out active:scale-[0.98]"
+                className="min-h-11 w-full transition-transform duration-150 ease-out active:scale-[0.98]"
                 onClick={() => setOpen(false)}
                 render={<Link href="/checkout" />}
               >
@@ -197,7 +198,7 @@ export function CartDrawer() {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="link-underline mx-auto w-fit text-[0.8125rem] text-muted-foreground transition-colors duration-150 hover:text-foreground"
+                className="link-underline mx-auto min-h-11 w-fit text-[0.8125rem] text-muted-foreground transition-colors duration-150 hover:text-foreground"
               >
                 Continue shopping
               </button>

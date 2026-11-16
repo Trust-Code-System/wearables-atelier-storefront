@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 type CategoryFilter = "all" | Category;
 type Sort = "featured" | "newest" | "price-asc" | "price-desc";
@@ -42,7 +43,7 @@ const SORT_OPTIONS = [
 
 const COLLECTION_INTROS = {
   all: {
-    title: "The Ashabi edit.",
+    title: "Shop all.",
     description:
       "Nigerian occasionwear and statement jewellery. Culture, luxury and elegance, brought together.",
     caption: "Occasionwear & statement jewellery",
@@ -141,7 +142,7 @@ function Filters({
           <button
             type="button"
             onClick={clearAll}
-            className="inline-flex items-center gap-1 text-[0.75rem] text-muted-foreground transition-colors duration-150 hover:text-foreground"
+            className="inline-flex min-h-11 items-center gap-1 text-[0.75rem] text-muted-foreground transition-colors duration-150 hover:text-foreground"
           >
             <XIcon className="size-3" />
             Clear all
@@ -185,7 +186,7 @@ function Filters({
               onClick={() => toggleSize(s)}
               aria-pressed={sizes.includes(s)}
               className={cn(
-                "grid size-9 place-items-center rounded-md border text-[0.8125rem] tabular-nums transition-all duration-150 ease-out active:scale-95",
+                "grid size-11 place-items-center rounded-md border text-[0.8125rem] tabular-nums transition-all duration-150 ease-out active:scale-95",
                 sizes.includes(s)
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border hover:border-foreground/40",
@@ -211,7 +212,7 @@ function Filters({
               type="button"
               onClick={() => setPriceRange(range.id)}
               className={cn(
-                "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-[0.8125rem] transition-colors duration-150",
+                "flex min-h-11 items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-[0.8125rem] transition-colors duration-150",
                 priceRange === range.id
                   ? "bg-secondary font-medium"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -232,15 +233,17 @@ function Filters({
   );
 }
 
-type InitialPage = Awaited<ReturnType<typeof loadCatalogPage>> | null;
+type InitialPage = (Awaited<ReturnType<typeof loadCatalogPage>> & { queryKey: string }) | null;
 
 export function ShopClient({ initialPage }: { initialPage: InitialPage }) {
   const searchParams = useSearchParams();
   return (
     <ShopCollection
-      key={searchParams.toString()}
+      key={searchParams.get("category") ?? "all"}
       categoryParam={searchParams.get("category")}
       sortParam={searchParams.get("sort")}
+      sizesParam={searchParams.get("sizes")}
+      priceParam={searchParams.get("price")}
       initialPage={initialPage}
     />
   );
@@ -249,10 +252,14 @@ export function ShopClient({ initialPage }: { initialPage: InitialPage }) {
 function ShopCollection({
   categoryParam,
   sortParam,
+  sizesParam,
+  priceParam,
   initialPage,
 }: {
   categoryParam: string | null;
   sortParam: string | null;
+  sizesParam: string | null;
+  priceParam: string | null;
   initialPage: InitialPage;
 }) {
   const initialCategory = (categoryParam ?? "all") as CategoryFilter;
@@ -261,13 +268,41 @@ function ShopCollection({
       ? initialCategory
       : "all",
   );
-  const [sizes, setSizes] = useState<number[]>([]);
-  const [priceRange, setPriceRange] = useState<string>("all");
+  const [sizes, setSizes] = useState<number[]>(() =>
+    (sizesParam ?? "").split(",").map(Number).filter((value) => (CLOTHING_SIZES as readonly number[]).includes(value)),
+  );
+  const [priceRange, setPriceRange] = useState<string>(
+    PRICE_RANGES.some((range) => range.id === priceParam) ? (priceParam as string) : "all",
+  );
   const [sort, setSort] = useState<Sort>(
     ["newest", "price-asc", "price-desc"].includes(sortParam ?? "")
       ? (sortParam as Sort)
       : "featured",
   );
+
+  // Reconcile navigation before the URL-writing effect can publish stale filters.
+  // Local filter changes keep the mounted controls and open mobile sheet intact.
+  const urlFilterKey = JSON.stringify([sortParam, sizesParam, priceParam]);
+  const [previousUrlFilterKey, setPreviousUrlFilterKey] = useState(urlFilterKey);
+  if (previousUrlFilterKey !== urlFilterKey) {
+    setPreviousUrlFilterKey(urlFilterKey);
+    setSort(["newest", "price-asc", "price-desc"].includes(sortParam ?? "") ? sortParam as Sort : "featured");
+    setSizes((sizesParam ?? "").split(",").map(Number).filter((value) => (CLOTHING_SIZES as readonly number[]).includes(value)));
+    setPriceRange(PRICE_RANGES.some((range) => range.id === priceParam) ? priceParam as string : "all");
+  }
+
+  // Keep the address bar in step with the filters so Reload, Back and a shared link
+  // show the same products. Category changes remount the page; the rest do not.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const set = (key: string, value: string | null) => (value ? url.searchParams.set(key, value) : url.searchParams.delete(key));
+    set("category", category === "all" ? null : category);
+    set("sizes", sizes.length ? [...sizes].sort((a, b) => a - b).join(",") : null);
+    set("price", priceRange === "all" ? null : priceRange);
+    set("sort", sort === "featured" ? null : sort);
+    const next = `${url.pathname}${url.search}`;
+    if (next !== `${window.location.pathname}${window.location.search}`) window.history.replaceState(null, "", next);
+  }, [category, sizes, priceRange, sort]);
 
   const toggleSize = (s: number) =>
     setSizes((prev) =>
@@ -290,13 +325,14 @@ function ShopCollection({
   const page = pagination.key === filterKey ? pagination.page : 1;
   const queryKey = JSON.stringify({ category, sizes, priceRange, sort, page });
   const [retry, setRetry] = useState(0);
+  const requestKey = `${queryKey}:${retry}`;
   const [result, setResult] = useState<{
     key: string;
     data: Product[];
     total: number;
     pages: number;
     error: string;
-  }>(() => initialPage ? { key: queryKey, data: initialPage.data, total: initialPage.meta.total, pages: initialPage.meta.totalPages, error: "" } : { key: "", data: [], total: 0, pages: 0, error: "" });
+  }>(() => initialPage?.queryKey === queryKey ? { key: requestKey, data: initialPage.data, total: initialPage.meta.total, pages: initialPage.meta.totalPages, error: "" } : { key: "", data: [], total: 0, pages: 0, error: "" });
   useEffect(() => {
     const controller = new AbortController();
     const query = JSON.parse(queryKey);
@@ -307,7 +343,7 @@ function ShopCollection({
         .then((body) => {
           if (!controller.signal.aborted && current === request)
             setResult({
-              key: queryKey,
+              key: requestKey,
               data: body.data,
               total: body.meta.total,
               pages: body.meta.totalPages,
@@ -317,12 +353,12 @@ function ShopCollection({
         .catch(() => {
           if (!controller.signal.aborted && current === request)
             setResult({
-              key: queryKey,
+              key: requestKey,
               data: [],
               total: 0,
               pages: 0,
               error:
-                "The collection is temporarily unavailable. Please try again.",
+                "We could not load the products. Please try again.",
             });
         });
     };
@@ -334,8 +370,8 @@ function ShopCollection({
       window.removeEventListener("focus", refresh);
       window.clearInterval(timer);
     };
-  }, [queryKey, retry]);
-  const loading = result.key !== queryKey;
+  }, [queryKey, requestKey]);
+  const loading = result.key !== requestKey;
   const error = loading ? "" : result.error;
   const filtered = loading ? [] : result.data;
 
@@ -353,7 +389,11 @@ function ShopCollection({
 
   return (
     <div className="store-catalog">
-      {/* Page header */}
+      {error && <div role="alert" className="catalog-availability">
+        <p>{error}</p>
+        <div><Button variant="outline" onClick={() => setRetry((value) => value + 1)}>Try again</Button><Link className="underline" href="/contact">Contact us for help</Link></div>
+      </div>}
+            {/* Page header */}
       <div className="store-catalog-header">
         <section
           className="catalog-intro"
@@ -361,7 +401,7 @@ function ShopCollection({
           data-collection={category}
         >
           <div className="catalog-intro-copy">
-            <p className="store-label">Wearables Atelier / The collection</p>
+            <p className="store-label">Wearables Atelier / Shop</p>
             <h1 id="collection-title" className="font-display">
               {intro.title}
             </h1>
@@ -393,9 +433,8 @@ function ShopCollection({
           </div>
         </section>
         <div className="catalog-toolbar">
-          <p className="catalog-piece-count">
-            <span>{loading ? "…" : result.total}</span>{" "}
-            {result.total === 1 ? "piece" : "pieces"} to discover
+          <p className="catalog-piece-count" aria-live="polite">
+            {loading ? "Loading products…" : error ? "Products could not be loaded" : <><span>{result.total}</span>{" "}{result.total === 1 ? "product" : "products"}</>}
           </p>
           <div className="catalog-toolbar-actions">
             {/* Mobile filters */}
@@ -404,7 +443,7 @@ function ShopCollection({
                 render={
                   <Button
                     variant="outline"
-                    className="lg:hidden"
+                    className="min-h-11 lg:hidden"
                     aria-label="Open filters"
                   />
                 }
@@ -466,34 +505,21 @@ function ShopCollection({
 
         {/* Grid */}
         <div>
-          {loading || error ? (
-            <p role="status" className="py-16 text-center">
-              {loading ? (
-                "Loading the collection…"
-              ) : (
-                <>
-                  {error}{" "}
-                  <button
-                    type="button"
-                    className="underline"
-                    onClick={() => setRetry((value) => value + 1)}
-                  >
-                    Retry
-                  </button>
-                </>
-              )}
-            </p>
-          ) : filtered.length === 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 xl:grid-cols-4" aria-hidden>
+              {[0, 1, 2, 3].map((n) => <div key={n} className="aspect-[4/5] animate-pulse rounded-md bg-muted" />)}
+            </div>
+          ) : error ? null : filtered.length === 0 ? (
             <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed py-24 text-center">
               <p className="font-display text-xl">
                 {activeCount > 0
                   ? "Nothing matches those filters"
-                  : "The collection is coming soon"}
+                  : "New products are coming soon"}
               </p>
               <p className="max-w-xs text-sm text-muted-foreground">
                 {activeCount > 0
                   ? "Try widening the price range or clearing a size or two."
-                  : "Check back soon for new pieces."}
+                  : "Please check back soon."}
               </p>
               <Button variant="outline" onClick={clearAll}>
                 Clear all filters

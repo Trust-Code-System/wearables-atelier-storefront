@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { SafeImage as Image } from "@/components/ui/safe-image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -21,8 +21,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
+import { BADGE_LABELS, canAddStock, remainingStock, variantStock, variantPrice, stockCount, stockLabel } from "@/lib/stock";
 import type { Product } from "@/lib/types";
-import { canAddStock, remainingStock, variantStock, variantPrice, stockCount, stockLabel } from "@/lib/stock";
 
 export function ProductClient({ slug, initialProduct }: { slug: string; initialProduct: Product }) {
   const { products, getProduct, loading, error } = useCatalog();
@@ -43,16 +43,16 @@ export function ProductClient({ slug, initialProduct }: { slug: string; initialP
       .slice(0, 4);
   }, [products, product]);
 
-  if (error) return <div role="status" className="px-6 py-24 text-center">Please retry loading the collection above.</div>;
+  if (error) return <div role="status" className="px-6 py-24 text-center">Please use “Try again” above to load the products.</div>;
 
   if (!product) {
     return (
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-4 py-32 text-center">
-        <p className="font-display text-2xl">We couldn&apos;t find that piece</p>
+        <p className="font-display text-2xl">We couldn&apos;t find that product</p>
         <p className="text-sm text-muted-foreground">
-          It may have sold out or moved. The collection is always changing.
+          It may have sold out or moved. You can look at all our products instead.
         </p>
-        <Button render={<Link href="/shop" />}>Back to the collection</Button>
+        <Button render={<Link href="/shop" />}>Shop all products</Button>
       </div>
     );
   }
@@ -122,8 +122,8 @@ export function ProductClient({ slug, initialProduct }: { slug: string; initialP
               </motion.div>
             </AnimatePresence>
             {soldOut ? <span className="product-unavailable-overlay">Unavailable at the moment</span> : product.badge ? (
-              <Badge variant="secondary" className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm capitalize">
-                {product.badge}
+              <Badge variant="secondary" className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm">
+                {BADGE_LABELS[product.badge]}
               </Badge>
             ) : null}
           </div>
@@ -158,14 +158,17 @@ export function ProductClient({ slug, initialProduct }: { slug: string; initialP
             <h1 className="font-display text-[clamp(1.75rem,3.5vw,2.5rem)] leading-tight tracking-tight">
               {product.name}
             </h1>
+<div className="flex items-baseline gap-2">
+            {size === null && product.variants && new Set(product.variants.map((variant) => variant.priceNGN)).size > 1 && <span className="text-sm text-muted-foreground">From</span>}
             <Price
-              amountNGN={variantPrice(product, size)}
+              amountNGN={size === null && product.variants ? Math.min(...product.variants.map((variant) => variant.priceNGN)) : variantPrice(product, size)}
               compareAtNGN={soldOut ? undefined : selectedVariant?.compareAtNGN ?? (size === null ? product.compareAtNGN : undefined)}
               className="text-lg"
             />
+            </div>
             <div className="product-stock-detail" data-unavailable={soldOut || undefined}>
               <p className="product-stock">{stockLabel(selectedVariant ? { stock: selectedVariant.available } : product)}</p>
-              <p>{soldOut ? "You can still save this piece to your wishlist." : oneSize ? "Available in the collection." : size === null ? "Total across all sizes. Choose your size below." : `Available in size ${size}.`}</p>
+              <p>{soldOut ? "You can still save this product to your wishlist." : oneSize ? "One size." : size === null ? "All sizes together. Choose your size below to see its stock." : `Size ${size}.`}</p>
             </div>
           </div>
 
@@ -203,7 +206,7 @@ export function ProductClient({ slug, initialProduct }: { slug: string; initialP
                   // Jelly Radio: the chosen chip swells on a spring and barges
                   // its neighbours outward, decaying with distance.
                   const distance = selectedIndex === -1 ? 0 : i - selectedIndex;
-                  const nudge = selected || selectedIndex === -1 ? 0 : Math.sign(distance) * Math.max(0, 7 - Math.abs(distance) * 2.5);
+                  const nudge = selected || selectedIndex === -1 ? 0 : Math.sign(distance) * Math.max(0, 2 - Math.abs(distance));
                   return (
                     <motion.button
                       key={s}
@@ -232,11 +235,11 @@ export function ProductClient({ slug, initialProduct }: { slug: string; initialP
                         setSizeError(false);
                       }}
                       initial={false}
-                      animate={reduceMotion ? undefined : { scale: selected ? 1.14 : 1, x: nudge }}
+                      animate={reduceMotion ? undefined : { scale: selected ? 1.06 : 1, x: nudge }}
                       whileTap={reduceMotion ? undefined : { scale: 0.9 }}
                       transition={{ type: "spring", stiffness: 520, damping: 26 }}
                       className={cn(
-                        "relative grid size-11 place-items-center rounded-md border text-sm tabular-nums transition-colors duration-150 ease-out",
+                        "relative grid size-12 place-items-center rounded-md border text-sm tabular-nums transition-colors duration-150 ease-out",
                         selected
                           ? "z-[1] border-primary bg-primary text-primary-foreground"
                           : "border-border hover:border-foreground/50",
@@ -249,7 +252,7 @@ export function ProductClient({ slug, initialProduct }: { slug: string; initialP
                 })}
               </div>
               <p className="text-[0.75rem] text-muted-foreground">
-                Numbered sizing — 6 (XS) through 16 (XXL). True to fit.
+                Sizes in stock: {product.sizes.map((s) => `${s} (${({ 6: "XS", 8: "S", 10: "M", 12: "L", 14: "XL", 16: "XXL" } as Record<number, string>)[s] ?? "—"})`).join(", ")}. True to fit.
               </p>
             </div>
           ) : (
@@ -298,13 +301,13 @@ export function ProductClient({ slug, initialProduct }: { slug: string; initialP
                 ) : (
                   <ShoppingBagIcon data-icon="inline-start" />
                 )}
-                {soldOut ? "Currently unavailable" : needsSize ? "Choose a size to add to bag" : remainingForBag === 0 ? "All available pieces in your bag" : added ? "Added to bag" : "Add to bag"}
+                {soldOut ? "Currently unavailable" : needsSize ? "Choose a size to add to bag" : remainingForBag === 0 ? "All available items are in your bag" : added ? "Added to bag" : "Add to bag"}
               </Button>
             </motion.div>
           </div>
 
           <WishlistButton id={product.id} name={product.name} showLabel />
-          {!soldOut && !canAdd && remainingForBag > 0 && <p className="text-sm text-muted-foreground">You can add {remainingForBag} more {remainingForBag === 1 ? "piece" : "pieces"} to your bag. Reduce the quantity to continue.</p>}
+          {!soldOut && !canAdd && remainingForBag > 0 && <p className="text-sm text-muted-foreground">You can add {remainingForBag} more {remainingForBag === 1 ? "item" : "items"} to your bag. Reduce the quantity to continue.</p>}
 
           {/* Accordions */}
           <Accordion defaultValue={["details"]} multiple className="mt-2">
@@ -325,9 +328,10 @@ export function ProductClient({ slug, initialProduct }: { slug: string; initialP
               <AccordionTrigger className="text-sm font-medium">Shipping & delivery</AccordionTrigger>
               <AccordionContent>
                 <p className="pb-2 text-[0.8125rem] leading-relaxed text-muted-foreground">
-                  Dispatched within 48 hours. Lagos same-day delivery available;
-                  nationwide 2–4 business days. Complimentary delivery on orders
-                  over ₦150,000.
+                  We send your order within 48 hours. Lagos same-day delivery
+                  is available; other places in Nigeria take 2–4 working days
+                  (Monday to Friday). The delivery fee depends on where you live and
+                  is shown at checkout before you pay.
                 </p>
               </AccordionContent>
             </AccordionItem>
@@ -335,7 +339,7 @@ export function ProductClient({ slug, initialProduct }: { slug: string; initialP
               <AccordionTrigger className="text-sm font-medium">Exchanges & returns</AccordionTrigger>
               <AccordionContent>
                 <p className="pb-2 text-[0.8125rem] leading-relaxed text-muted-foreground">
-                  Exchange sizes within 7 days, unworn with tags attached. For
+                  You can exchange a size within 7 days if the item is unworn with tags attached. For
                   hygiene reasons, earrings are final sale unless faulty.
                 </p>
               </AccordionContent>
