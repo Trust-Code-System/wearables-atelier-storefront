@@ -2,6 +2,9 @@ import "../(store)/store.css";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CartDrawer } from "@/components/cart/cart-drawer";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default function AuthLayout({
   children,

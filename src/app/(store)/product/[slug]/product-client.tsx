@@ -22,12 +22,13 @@ import {
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 import { BADGE_LABELS, canAddStock, remainingStock, variantStock, variantPrice, stockCount, stockLabel } from "@/lib/stock";
+import type { Product } from "@/lib/types";
 
-export function ProductClient({ slug }: { slug: string }) {
-  const { products, getProduct, loading, error } = useCatalog();
+export function ProductClient({ slug, initialProduct }: { slug: string; initialProduct: Product }) {
+  const { products, getProduct, error } = useCatalog();
   const { items, addItem, setOpen, busy, loading: cartLoading } = useCart();
 
-  const product = getProduct(slug);
+  const product = loading ? initialProduct : getProduct(slug);
   const [imageIndex, setImageIndex] = useState(0);
   const [size, setSize] = useState<number | null>(null);
   const [qty, setQtyLocal] = useState(1);
@@ -42,7 +43,7 @@ export function ProductClient({ slug }: { slug: string }) {
       .slice(0, 4);
   }, [products, product]);
 
-  if (loading || error) return <div role="status" className="px-6 py-24 text-center">{error ? "Please use “Try again” above to load the products." : "Loading this product…"}</div>;
+  if (error) return <div role="status" className="px-6 py-24 text-center">Please use “Try again” above to load the products.</div>;
 
   if (!product) {
     return (

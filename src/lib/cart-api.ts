@@ -49,7 +49,7 @@ export async function cartRequest(method = "GET", path = "", quantity?: number):
     if (response.status === 409) throw new CartError("Your bag or availability changed. Review your bag and try again.");
     if (response.status === 429) throw new CartError("Too many bag updates. Please wait a moment and try again.");
     if (response.status === 403) throw new CartError("The shop would not accept this change. Refresh the page and try again.", true);
-    if (response.status >= 500) throw new CartError("The shop is having trouble saving your bag. Nothing was added. Please try again in a minute.", true);
+    if (response.status >= 500) throw new CartError("The shop had trouble saving your bag. Review your bag before trying again.", true);
     throw new CartError("We could not update your bag. Please try again.", true);
   }
   const cart = await response.json() as SavedCart;

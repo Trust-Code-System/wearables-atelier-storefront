@@ -233,7 +233,9 @@ function Filters({
   );
 }
 
-export function ShopClient() {
+type InitialPage = Awaited<ReturnType<typeof loadCatalogPage>> | null;
+
+export function ShopClient({ initialPage }: { initialPage: InitialPage }) {
   const searchParams = useSearchParams();
   return (
     <ShopCollection
@@ -242,6 +244,7 @@ export function ShopClient() {
       sortParam={searchParams.get("sort")}
       sizesParam={searchParams.get("sizes")}
       priceParam={searchParams.get("price")}
+      initialPage={initialPage}
     />
   );
 }
@@ -251,11 +254,13 @@ function ShopCollection({
   sortParam,
   sizesParam,
   priceParam,
+  initialPage,
 }: {
   categoryParam: string | null;
   sortParam: string | null;
   sizesParam: string | null;
   priceParam: string | null;
+  initialPage: InitialPage;
 }) {
   const initialCategory = (categoryParam ?? "all") as CategoryFilter;
   const [category, setCategory] = useState<CategoryFilter>(
@@ -274,6 +279,17 @@ function ShopCollection({
       ? (sortParam as Sort)
       : "featured",
   );
+
+  // Reconcile navigation before the URL-writing effect can publish stale filters.
+  // Local filter changes keep the mounted controls and open mobile sheet intact.
+  const urlFilterKey = JSON.stringify([sortParam, sizesParam, priceParam]);
+  const [previousUrlFilterKey, setPreviousUrlFilterKey] = useState(urlFilterKey);
+  if (previousUrlFilterKey !== urlFilterKey) {
+    setPreviousUrlFilterKey(urlFilterKey);
+    setSort(["newest", "price-asc", "price-desc"].includes(sortParam ?? "") ? sortParam as Sort : "featured");
+    setSizes((sizesParam ?? "").split(",").map(Number).filter((value) => (CLOTHING_SIZES as readonly number[]).includes(value)));
+    setPriceRange(PRICE_RANGES.some((range) => range.id === priceParam) ? priceParam as string : "all");
+  }
 
   // Keep the address bar in step with the filters so Reload, Back and a shared link
   // show the same products. Category changes remount the page; the rest do not.
@@ -316,7 +332,7 @@ function ShopCollection({
     total: number;
     pages: number;
     error: string;
-  }>({ key: "", data: [], total: 0, pages: 0, error: "" });
+  }>(() => initialPage ? { key: requestKey, data: initialPage.data, total: initialPage.meta.total, pages: initialPage.meta.totalPages, error: "" } : { key: "", data: [], total: 0, pages: 0, error: "" });
   useEffect(() => {
     const controller = new AbortController();
     const query = JSON.parse(queryKey);

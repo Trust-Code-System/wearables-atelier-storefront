@@ -61,7 +61,7 @@ export async function accountAction(
     // the request; blaming the customer's password would be wrong.
     const serviceFailure = response.status >= 500 || (response.status === 403 && !detail?.code);
     if (serviceFailure)
-      throw new Error("We could not complete this right now. Nothing was changed. Please try again in a minute.");
+      throw new Error("We could not confirm this change. Check your account before trying again.");
     if (action === "sign-in/email")
       throw new Error(
         "We could not sign you in. Check your email and password. If you have just created an account, verify your email first: use “Send the verification email again” below.",

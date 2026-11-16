@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { CustomerInformationPage } from "@/components/layout/customer-information-page";
 
-export const metadata: Metadata = {
-  title: "Shipping & returns",
-  description: "Wearables Atelier delivery, collection, exchange and returns information.",
-};
+export const metadata: Metadata = pageMetadata("Shipping & Returns", "Wearables by Ashabi delivery, collection, exchanges and returns information.", "/shipping-returns");
 
 export default function ShippingReturnsPage() {
   return (

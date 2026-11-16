@@ -75,7 +75,7 @@ test("a refused or failing service is not blamed on the customer, and bag failur
     await assert.rejects(accountAction("sign-in/email", {}), error => !/password/i.test(error.message) && /try again/.test(error.message));
     await assert.rejects(cartRequest("POST"), error => error.contact === true && /refresh the page/i.test(error.message));
     globalThis.fetch = async () => new Response(null, { status: 503 });
-    await assert.rejects(cartRequest("POST"), error => error.contact === true && /nothing was added/i.test(error.message));
+    await assert.rejects(cartRequest("POST"), error => error.contact === true && /review your bag before trying again/i.test(error.message));
     globalThis.fetch = async () => Response.json({ code: "INVALID_EMAIL_OR_PASSWORD" }, { status: 401 });
     await assert.rejects(accountAction("sign-in/email", {}), /Check your email and password/);
     globalThis.fetch = async () => new Response(null, { status: 409 });
