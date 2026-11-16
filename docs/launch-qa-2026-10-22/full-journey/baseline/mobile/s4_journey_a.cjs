@@ -4,7 +4,7 @@ const {launch,shot,audit,OUT,fs}=require('./lib.cjs');
  const T0=Date.now();const log=[];
  const mark=(n,extra)=>{const o={step:n,atSec:((Date.now()-T0)/1000).toFixed(1),bytes:bytes.total,...extra};log.push(o);console.log(JSON.stringify(o));};
  await page.goto('http://localhost:3101/',{waitUntil:'commit'});
- // wait until hydrated: cart badge no longer "..." 
+ // wait until hydrated: cart badge no longer "..."
  await page.waitForFunction(()=>{const b=document.querySelector('.store-bag-button');return b&&!/checking/i.test(b.getAttribute('aria-label')||'')},null,{timeout:180000});
  mark('landing hydrated (bag badge resolved)');
  await shot(page,'04-a1-landing-hydrated');
